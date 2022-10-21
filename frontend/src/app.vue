@@ -21,21 +21,7 @@
 
 <script>
 export default {
-  created () {
-    fetch('/api/', { method: 'get' })
-      .then(response => {
-        console.log(response)
-      })
 
-    // fetch('/api/', {
-    //   method: 'post',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({label: 'hello', completed: 1})
-    // })
-    //   .then(response => {
-    //     console.log(response)
-    //   })
-  }
 }
 </script>
 
@@ -47,5 +33,9 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
+}
+
+header ul {
+  list-style-type: none;
 }
 </style>

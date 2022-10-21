@@ -10,7 +10,7 @@ Vue.use(VueRouter)
 export default new VueRouter({
   mode: 'history',
   routes: [
-    { path: '/home', component: TodoHome },
+    { path: '/', component: TodoHome },
     { path: '/todo-list', component: TodoList },
     { path: '/todo-task', component: TodoTask }
   ]
