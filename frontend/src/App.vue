@@ -12,6 +12,13 @@ export default {
   name: 'App',
   components: {
     HelloWorld
+  },
+
+  created () {
+    fetch('/api/', { method: 'get' })
+      .then(response => {
+        console.log(response)
+      })
   }
 }
 </script>
