@@ -1,7 +1,5 @@
 <?php
 
-die('Hello world!');
-
 function connectToDatabase() {
   $mysqli = new mysqli("127.0.0.1:3306", "root", "root", "todo");
 
@@ -19,7 +17,11 @@ function getTasks () {
   $result = $mysqli->query($sql);
 
   $rows = [];
-  while ($obj = $result->fetch_object()) array_push($rows, $obj);
+  while ($object = $result->fetch_object()) {
+    $object->id = (int)$object->id;
+    $object->completed = (int)$object->completed;
+    array_push($rows, $object);
+  }
 
   echo json_encode($rows);
   http_response_code(200);
@@ -33,6 +35,8 @@ function getTask(int $id) {
   $sql = "SELECT * FROM `tasks` WHERE `id` = $id";
   $result = $mysqli->query($sql);
   $task = $result->fetch_object();
+  $task->id = (int)$task->id;
+  $task->completed = (int)$task->completed;
 
   echo json_encode($task);
   http_response_code(200);
