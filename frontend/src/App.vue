@@ -1,24 +1,40 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <header>
+      <img alt="Vue logo" src="./assets/logo.png">
+      <nav>
+        <ul>
+          <li><router-link to="/home">Home</router-link></li>
+          <li><router-link to="/todo-list">Todo List</router-link></li>
+          <li><router-link to="/todo-task">Todo Task</router-link></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main>
+      <router-view></router-view>
+    </main>
+
+    <footer>FOOTER</footer>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
 export default {
-  name: 'App',
-  components: {
-    HelloWorld
-  },
-
   created () {
     fetch('/api/', { method: 'get' })
       .then(response => {
         console.log(response)
       })
+
+    // fetch('/api/', {
+    //   method: 'post',
+    //   headers: { 'Content-Type': 'application/json' },
+    //   body: JSON.stringify({label: 'hello', completed: 1})
+    // })
+    //   .then(response => {
+    //     console.log(response)
+    //   })
   }
 }
 </script>
