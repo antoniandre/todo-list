@@ -87,10 +87,11 @@ function updateTask(int $id, string $label, int $completed) {
 }
 
 $params = json_decode(file_get_contents('php://input'));
+$endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'GET':
-    if (isset($params->id)) getTask($params->id);
+    if (!empty($endpoint)) getTask((int)$endpoint);
     else getTasks();
     break;
   case 'POST':
