@@ -16,5 +16,12 @@ module.exports = {
   },
   plugins: [
     'vue'
-  ]
+  ],
+  rules: {
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-empty': 'warn',
+    'no-unused-vars': 'warn',
+    'brace-style': ['warn', 'stroustrup']
+  }
 }
