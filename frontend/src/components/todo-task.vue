@@ -1,12 +1,36 @@
 <template>
 <div>
-  <h1>TODO TASK</h1>
+  <router-link to="/">&lt; Back to list</router-link>
+  <h1>TASK</h1>
+  <p>#{{ task.id }}</p>
+  <p><strong>Label: </strong>{{ task.label }}</p>
+  <p><strong>completed: </strong>{{ task.completed }}</p>
 </div>
 </template>
 
 <script>
 export default {
+  props: {
+    id: { type: [String, Number], required: true }
+  },
 
+  data: () => ({
+    task: {
+      id: null,
+      label: '',
+      completed: false
+    }
+  }),
+
+  created () {
+    fetch(`/api/${this.id}`, {
+      method: 'get'
+    })
+      .then(response => response.json())
+      .then(response => {
+        this.task = response
+      })
+  }
 }
 </script>
 
