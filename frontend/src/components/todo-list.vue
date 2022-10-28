@@ -2,8 +2,9 @@
 <div class="todo-list">
   <ul>
     <li v-for="task in tasks" :key="task.id">
-      <input type="checkbox" :checked="task.completed === 1">
-      <span>{{ task.label }}</span>
+      <input :id="`checkbox-${task.id}`" type="checkbox" :checked="task.completed">
+      <label :for="`checkbox-${task.id}`">{{ task.label }}</label>
+      <router-link :to="`/task/${task.id}`">&#10132;</router-link>
     </li>
   </ul>
 </div>
