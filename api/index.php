@@ -19,7 +19,7 @@ function getTasks () {
   $rows = [];
   while ($object = $result->fetch_object()) {
     $object->id = (int)$object->id;
-    $object->completed = (int)$object->completed;
+    $object->completed = (bool)$object->completed;
     array_push($rows, $object);
   }
 
@@ -35,6 +35,10 @@ function getTask(int $id) {
   $sql = "SELECT * FROM `tasks` WHERE `id` = $id";
   $result = $mysqli->query($sql);
   $task = $result->fetch_object();
+
+  if ($mysqli->error) return http_response_code(500);
+  elseif (!$task) return http_response_code(404);
+
   $task->id = (int)$task->id;
   $task->completed = (int)$task->completed;
 
