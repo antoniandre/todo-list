@@ -2,13 +2,7 @@
   <div id="app">
     <header>
       <img alt="Vue logo" src="./assets/logo.png">
-      <nav>
-        <ul>
-          <li><router-link to="/home">Home</router-link></li>
-          <li><router-link to="/todo-list">Todo List</router-link></li>
-          <li><router-link to="/todo-task">Todo Task</router-link></li>
-        </ul>
-      </nav>
+      <h1>To Do App</h1>
     </header>
 
     <main>
