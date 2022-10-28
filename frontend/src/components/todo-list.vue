@@ -1,7 +1,5 @@
 <template>
 <div class="todo-list">
-  <h1>TODO LIST</h1>
-
   <ul>
     <li v-for="task in tasks" :key="task.id">
       <input type="checkbox" :checked="task.completed === 1">
@@ -36,9 +34,25 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
 .todo-list ul {
   list-style-type: none;
   text-align: left;
+  max-width: 300px;
+  margin: auto;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+  padding: 40px;
+  background-color: #f4f4f4;
+
+  label {padding: 0 8px;}
+  :checked ~ label {
+    color: green;
+    text-decoration: line-through;
+  }
+
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 }
 </style>
