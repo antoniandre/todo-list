@@ -1,0 +1,60 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-image:
+    url('@/assets/pattern.svg'),
+    linear-gradient(103deg, rgba(253, 189, 85, 1) 7.8%, rgba(249, 131, 255, 1) 100.3%);
+  background-size: 300px, cover;
+}
+
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.main-content {
+  max-width: 300px;
+  text-align: left;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+  padding: 40px 0;
+  flex-grow: 1;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(2px);
+}
+
+header {
+  display: flex;
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 12px;
+
+  img {
+    width: 25px;
+    margin-right: 8px;
+  }
+
+  h1 {font-size: 20px;}
+}
+
+main {
+  padding: 40px;
+  flex-grow: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+footer {
+  background-color: rgba(255, 255, 255, 0.3);
+  padding: 12px;
+}

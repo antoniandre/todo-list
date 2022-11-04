@@ -1,26 +1,10 @@
 <template>
-<div class="todo-list">
+<div class="main-content todo-list">
   <ul>
     <li v-for="task in tasks" :key="task.id">
-      <input
-        v-model="task.completed"
-        :id="`checkbox-${task.id}`"
-        type="checkbox"
-        :checked="task.completed === 1"
-        @change="saveTask(task)">
+      <input :id="`checkbox-${task.id}`" type="checkbox" :checked="task.completed">
       <label :for="`checkbox-${task.id}`">{{ task.label }}</label>
-      <router-link :to="`/task/${task.id}`">&#10132;</router-link>
-    </li>
-    <li>
-      <input
-        v-model="newTask.completed"
-        id="checkbox-new"
-        type="checkbox"
-        :checked="newTask.completed === 1"
-        @change="saveTask(newTask)">
-      <label :for="`checkbox-new`">
-        <input type="text" placeholder="New task...">
-      </label>
+      <router-link :to="`/task/${task.id}`" class="arrow">&#10132;</router-link>
     </li>
   </ul>
 </div>
@@ -62,33 +46,54 @@ export default {
 
 <style lang="scss">
 .todo-list {
-  padding: 40px;
-  max-width: 300px;
-  margin: auto;
-  align-self: center;
-  flex: 1 1 auto;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.3);
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
-
   ul {
-  list-style-type: none;
-  text-align: left;
+    list-style-type: none;
   }
 
   li {
     display: flex;
-    align-items: center;
+    padding: 5px 30px;
+    transition: 0.2s;
+
+    &:hover {background-color: rgba(255, 255, 255, 0.2);}
   }
 
-  label {padding-left: 10px;}
-  :checked + label {
-    text-decoration: line-through;
-    color: #40b883;
+  label {
+    position: relative;
+    padding: 0 8px;
+    flex-grow: 1;
+
+    &:before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      width: 0;
+      transform: translateY(-50%);
+      border-top: 1px solid green;
+      transition: 0.2s ease-in-out;
+    }
   }
 
-  a {margin-left: 6px;}
+  :checked ~ label {
+    color: green;
+    // text-decoration: line-through;
+
+    &:before {
+      width: 100%;
+    }
+  }
+
+  .arrow {
+    text-decoration: none;
+    color: inherit;
+    padding: 0px 12px;
+    transition: 0.3s ease-in-out;
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+
 }
 </style>

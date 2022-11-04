@@ -19,7 +19,7 @@ function getTasks () {
   $rows = [];
   while ($object = $result->fetch_object()) {
     $object->id = (int)$object->id;
-    $object->completed = (int)$object->completed;
+    $object->completed = (bool)$object->completed;
     array_push($rows, $object);
   }
 
