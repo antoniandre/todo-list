@@ -1,5 +1,5 @@
 <template>
-<div>
+<div class="main-content todo-task">
   <router-link to="/">&lt; Back to list</router-link>
   <h1>TASK</h1>
   <p>#{{ task.id }}</p>
@@ -34,6 +34,8 @@ export default {
 }
 </script>
 
-<style>
-
+<style lang="scss">
+.todo-task {
+  padding: 40px;
+}
 </style>
