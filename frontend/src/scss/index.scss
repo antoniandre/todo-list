@@ -23,7 +23,7 @@ body {
 }
 
 .main-content {
-  max-width: 300px;
+  max-width: 400px;
   text-align: left;
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
   padding: 40px 0;
@@ -57,4 +57,10 @@ main {
 footer {
   background-color: rgba(255, 255, 255, 0.3);
   padding: 12px;
+
+  .copyright {
+    opacity: 0.6;
+    font-style: italic;
+    font-size: 14px;
+  }
 }

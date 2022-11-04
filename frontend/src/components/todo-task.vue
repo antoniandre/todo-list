@@ -1,8 +1,7 @@
 <template>
 <div class="main-content todo-task">
   <router-link to="/">&lt; Back to list</router-link>
-  <h1>TASK</h1>
-  <p>#{{ task.id }}</p>
+  <h1>Task #{{ task.id }}</h1>
   <p><strong>Label: </strong>{{ task.label }}</p>
   <p><strong>completed: </strong>{{ task.completed }}</p>
 </div>

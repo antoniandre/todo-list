@@ -1,5 +1,6 @@
 <template>
 <div class="main-content todo-list">
+  <h1>To Do List</h1>
   <ul>
     <li v-for="task in tasks" :key="task.id">
       <input :id="`checkbox-${task.id}`" type="checkbox" :checked="task.completed">
@@ -26,7 +27,7 @@ export default {
     // fetch('/api/', {
     //   method: 'post',
     //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({label: 'hello', completed: 1})
+    //   body: JSON.stringify({ label: 'hello', completed: 1 })
     // })
     //   .then(response => {
     //     console.log(response)
@@ -37,12 +38,20 @@ export default {
 
 <style lang="scss">
 .todo-list {
+  padding-top: 0;
+
+  h1 {
+    margin: 20px 0 10px;
+    text-align: center;
+  }
+
   ul {
     list-style-type: none;
   }
 
   li {
     display: flex;
+    align-items: center;
     padding: 5px 30px;
     transition: 0.2s;
 
@@ -51,8 +60,7 @@ export default {
 
   label {
     position: relative;
-    padding: 0 8px;
-    flex-grow: 1;
+    margin-left: 8px;
 
     &:before {
       content: '';
@@ -61,30 +69,37 @@ export default {
       left: 0;
       width: 0;
       transform: translateY(-50%);
-      border-top: 1px solid green;
+      border-top: 1px solid #009688;
       transition: 0.2s ease-in-out;
     }
   }
 
   :checked ~ label {
-    color: green;
-    // text-decoration: line-through;
+    color: #009688;
 
-    &:before {
-      width: 100%;
-    }
+    &:before {width: 100%;}
   }
 
   .arrow {
     text-decoration: none;
     color: inherit;
     padding: 0px 12px;
+    border-radius: 99rem;
+    background-color: rgba(255, 255, 255, 0.12);
+    color: #555;
+    width: 1.8em;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: auto;
+    font-size: 0.9rem;
     transition: 0.3s ease-in-out;
 
     &:hover {
       transform: translateX(4px);
+      background-color: rgba(255, 255, 255, 0.25);
     }
   }
-
 }
 </style>
