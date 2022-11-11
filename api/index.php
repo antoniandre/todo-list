@@ -75,11 +75,11 @@ function updateTask(int $id, string $label, int $completed) {
   $mysqli = connectToDatabase();
   $id = (int)$id;
   $changes = [];
-  if ($label !== null) {
+  if ($label !== '') {
     $label = $mysqli->real_escape_string($label);
     $changes[] = "`label` = '$label'";
   }
-  if ($completed !== null) $changes[] = "`completed` = $completed";
+  if ($completed !== '') $changes[] = "`completed` = $completed";
   $sql = "UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $id";
 
   $mysqli->query($sql);
@@ -102,7 +102,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     addTask($params->label, $params->completed);
     break;
   case 'PUT':
-    updateTask($params->id, $params->label, $params->completed);
+    updateTask($params->id, $params->label ? $params->label : '', $params->completed);
     break;
   case 'DELETE':
     deleteTask($params->id);
