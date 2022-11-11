@@ -1,8 +1,8 @@
 <template>
   <div id="app">
     <header>
-      <img alt="Vue logo" src="./assets/logo.png">
-      <h1>To Do App</h1>
+      <i class="app-logo i-done-all"></i>
+      <span class="app-name">To Do App</span>
     </header>
 
     <main>

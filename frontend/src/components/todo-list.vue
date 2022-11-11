@@ -3,7 +3,13 @@
   <h1>To Do List</h1>
   <ul>
     <li v-for="task in tasks" :key="task.id">
-      <input :id="`checkbox-${task.id}`" type="checkbox" :checked="task.completed">
+      <input
+      v-model="task.completed"
+      @input="saveTask(task)"
+      :id="`checkbox-${task.id}`"
+      type="checkbox"
+      :checked="task.completed">
+      <i :class=" task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
       <label :for="`checkbox-${task.id}`">{{ task.label }}</label>
       <router-link :to="`/task/${task.id}`" class="arrow">&#10132;</router-link>
     </li>
@@ -16,6 +22,19 @@ export default {
   data: () => ({
     tasks: []
   }),
+
+  methods: {
+    saveTask (task) {
+      fetch('/api/', {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: task.id, completed: !task.completed })
+      })
+        .then(response => {
+          console.log(response)
+        })
+    }
+  },
 
   created () {
     fetch('/api/', { method: 'get' })
@@ -56,6 +75,17 @@ export default {
     transition: 0.2s;
 
     &:hover {background-color: rgba(255, 255, 255, 0.2);}
+  }
+
+  input[type="checkbox"] {
+    position: absolute;
+    z-index: -20;
+    visibility: hidden;
+  }
+
+  i {
+    font-size: 20px;
+    padding-top: 3px;
   }
 
   label {
