@@ -1,0 +1,9 @@
+@font-face {
+  font-family: 'autography';
+  src: url('~@/assets/autography.woff2') format('woff2'),
+       url('~@/assets/autography.woff') format('woff');
+}
+
+h1 {
+  font-family: 'autography';
+}
