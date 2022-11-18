@@ -1,5 +1,34 @@
 <?php
 
+// MAIN.
+// --------------------------------------------------------
+$params = json_decode(file_get_contents('php://input'));
+$endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
+
+switch ($_SERVER['REQUEST_METHOD']) {
+  case 'GET':
+    if (!empty($endpoint)) getTask((int)$endpoint);
+    else getTasks();
+    break;
+  case 'POST':
+    addTask($params->label, $params->completed);
+    break;
+  case 'PUT':
+    updateTask($params->id, $params->label ? $params->label : '', $params->completed);
+    break;
+  case 'DELETE':
+    deleteTask($params->id);
+    break;
+  default:
+    http_response_code(405);
+    break;
+}
+
+header('Content-Type: application/json; charset=utf-8');
+// --------------------------------------------------------
+
+// Functions.
+// --------------------------------------------------------
 function connectToDatabase() {
   $mysqli = new mysqli("127.0.0.1:3306", "root", "root", "todo");
 
@@ -48,6 +77,13 @@ function getTask(int $id) {
   $mysqli->close();
 }
 
+/**
+ * Create a task in the database.
+ *
+ * @param string $label the task label.
+ * @param integer $completed 0 or 1 for completed task.
+ * @return void
+ */
 function addTask(string $label, int $completed = 0) {
   $mysqli = connectToDatabase();
   $label = $mysqli->real_escape_string($label);
@@ -89,29 +125,6 @@ function updateTask(int $id, string $label, int $completed) {
 
   $mysqli->close();
 }
-
-$params = json_decode(file_get_contents('php://input'));
-$endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
-
-switch ($_SERVER['REQUEST_METHOD']) {
-  case 'GET':
-    if (!empty($endpoint)) getTask((int)$endpoint);
-    else getTasks();
-    break;
-  case 'POST':
-    addTask($params->label, $params->completed);
-    break;
-  case 'PUT':
-    updateTask($params->id, $params->label ? $params->label : '', $params->completed);
-    break;
-  case 'DELETE':
-    deleteTask($params->id);
-    break;
-  default:
-    http_response_code(405);
-    break;
-}
-
-header('Content-Type: application/json; charset=utf-8');
+// --------------------------------------------------------
 
 ?>
