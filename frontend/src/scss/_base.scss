@@ -69,3 +69,9 @@ footer {
     font-size: 14px;
   }
 }
+
+// Shared classes.
+// --------------------------------------------------------
+.d-flex {display: flex;}
+.d-flex.align-center {align-items: center;}
+.d-flex.justify-center {justify-content: center;}
