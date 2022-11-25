@@ -35,7 +35,7 @@ header('Content-Type: application/json; charset=utf-8');
  * @return \mysqli the MySQLi object.
  */
 function connectToDatabase() {
-  $mysqli = new mysqli("127.0.0.1:3306", "root", "root", "todo");
+  $mysqli = new mysqli('127.0.0.1:3306', 'root', 'root', 'todo');
 
   if ($mysqli->connect_error) {
     error_log($mysqli->connect_error);
@@ -69,7 +69,7 @@ function getTasks () {
 }
 
 /**
- * Get a task from the database given its id and output as an object.
+ * Get a task from the database given its id and output it as an object.
  *
  * @param integer $id the id of the task to get.
  * @return void
