@@ -29,6 +29,11 @@ header('Content-Type: application/json; charset=utf-8');
 
 // Functions.
 // --------------------------------------------------------
+/**
+ * Connect to the database and return the MySQLi object, or die in case of failure.
+ *
+ * @return \mysqli the MySQLi object.
+ */
 function connectToDatabase() {
   $mysqli = new mysqli("127.0.0.1:3306", "root", "root", "todo");
 
@@ -40,6 +45,11 @@ function connectToDatabase() {
   return $mysqli;
 }
 
+/**
+ * Get all the tasks from the database and outputs them in an array of objects.
+ *
+ * @return void
+ */
 function getTasks () {
   $mysqli = connectToDatabase();
   $sql = "SELECT * FROM tasks";
@@ -58,6 +68,12 @@ function getTasks () {
   $mysqli->close();
 }
 
+/**
+ * Get a task from the database given its id and output as an object.
+ *
+ * @param integer $id the id of the task to get.
+ * @return void
+ */
 function getTask(int $id) {
   $mysqli = connectToDatabase();
   $id = (int)$id;
@@ -81,7 +97,7 @@ function getTask(int $id) {
  * Create a task in the database.
  *
  * @param string $label the task label.
- * @param integer $completed 0 or 1 for completed task.
+ * @param integer $completed: 0 or 1 for completed task.
  * @return void
  */
 function addTask(string $label, int $completed = 0) {
@@ -96,6 +112,12 @@ function addTask(string $label, int $completed = 0) {
   $mysqli->close();
 }
 
+/**
+ * Delete a task from the database.
+ *
+ * @param integer $id the id of the task to delete.
+ * @return void
+ */
 function deleteTask(int $id) {
   $mysqli = connectToDatabase();
   $id = (int)$id;
@@ -107,6 +129,14 @@ function deleteTask(int $id) {
   $mysqli->close();
 }
 
+/**
+ * Update a task in the database.
+ *
+ * @param integer $id the id of the task to update.
+ * @param string $label the new task label.
+ * @param integer $completed: 0 or 1 for a completed task.
+ * @return void
+ */
 function updateTask(int $id, string $label, int $completed) {
   $mysqli = connectToDatabase();
   $id = (int)$id;
