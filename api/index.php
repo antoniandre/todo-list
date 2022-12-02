@@ -6,21 +6,21 @@ $params = json_decode(file_get_contents('php://input'));
 $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
 
 switch ($_SERVER['REQUEST_METHOD']) {
-  case 'GET':
+  case 'GET': // Get one or all tasks.
     if (!empty($endpoint)) getTask((int)$endpoint);
     else getTasks();
     break;
-  case 'POST':
+  case 'POST': // Create a task.
     addTask($params->label, $params->completed);
     break;
-  case 'PUT':
-    updateTask($params->id, $params->label ? $params->label : '', $params->completed);
+  case 'PUT': // Update a task.
+    updateTask($params->id, $params->label ? $params->label : '', (bool)$params->completed);
     break;
-  case 'DELETE':
+  case 'DELETE': // Delete a task.
     deleteTask($params->id);
     break;
   default:
-    http_response_code(405);
+    http_response_code(405); // Method not allowed.
     break;
 }
 
