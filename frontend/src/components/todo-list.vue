@@ -11,7 +11,7 @@
       <label>{{ task.label }}</label>
       <router-link :to="`/task/${task.id}`" class="arrow i-arrow-right"></router-link>
     </li>
-    <li @click="newTask.completed = !newTask.completed">
+    <li ref="newTask" class="new-task" @click="newTask.completed = !newTask.completed">
       <i :class="newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
       <input
         v-model="newTask.label"
@@ -19,7 +19,7 @@
         @keypress.enter="saveNewTask(newTask)"
         type="text"
         placeholder="New task...">
-      <button @click="saveNewTask(newTask)">OK</button>
+      <button @click.stop="saveNewTask(newTask)">OK</button>
     </li>
   </ul>
 </div>
@@ -62,6 +62,9 @@ export default {
         .then(response => {
           this.tasks.push({ ...this.newTask })
           this.newTask = Object.assign(this.newTask, { label: '', completed: false })
+          this.$nextTick(() => {
+            this.$refs.newTask.scrollIntoView({ behavior: 'smooth' })
+          })
         })
     }
   },
@@ -106,15 +109,33 @@ export default {
     align-items: center;
     padding: 5px 30px;
     transition: 0.2s;
+    cursor: pointer;
 
     &:hover {background-color: rgba(255, 255, 255, 0.2);}
   }
 
   i {
+    position: relative;
     font-size: 20px;
-    padding-top: 3px;
+    width: 1.5rem;
+    height: 1.5rem;
+
+    &:before {padding-top: 3px;}
+    &:after {
+      content: '';
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      border-radius: 99em;
+      background-color: currentColor;
+      aspect-ratio: 1;
+      opacity: 0;
+    }
   }
   .checked i {color: #009688;}
+  li:hover i:after {opacity: 0.25;}
 
   label {
     position: relative;
@@ -162,6 +183,18 @@ export default {
     }
 
     &:before {padding-top: 0.2rem;}
+  }
+
+  .new-task {
+    input {margin: 0 8px;}
+    button {
+      margin-left: auto;
+      border-radius: 99em;
+      background-color: rgba(255, 255, 255, 0.6);
+      border: none;
+      width: 1.5rem;
+      aspect-ratio: 1;
+    }
   }
 }
 </style>
