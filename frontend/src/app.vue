@@ -11,7 +11,7 @@
 
     <footer>
       <div class="copyright">
-        &copy; To Do App {{ (new Date()).getFullYear() }}
+        &copy; <span>To Do App</span> {{ (new Date()).getFullYear() }}
       </div>
     </footer>
   </div>

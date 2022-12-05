@@ -35,7 +35,7 @@ header {
   }
 
   .app-name {
-    font: bold 20px 'autography';
+    font: bold 20px $title-font;
   }
 }
 
@@ -64,9 +64,16 @@ footer {
   padding: 12px;
 
   .copyright {
-    opacity: 0.6;
+    opacity: 0.8;
     font-style: italic;
     font-size: 14px;
+
+    span {
+      opacity: 0.8;
+      font: bold 19px/1.4 $title-font;
+      margin-left: 8px;
+      margin-right: 8px;
+    }
   }
 }
 
