@@ -94,7 +94,7 @@ function getTask(int $id) {
 }
 
 /**
- * Create a task in the database.
+ * Create a task in the database, and outputs the new task to the frontend.
  *
  * @param string $label the task label.
  * @param integer $completed: 0 or 1 for completed task.
@@ -108,6 +108,9 @@ function addTask(string $label, int $completed = 0) {
   $mysqli->query($sql);
 
   http_response_code($mysqli->error ? 500 : 201);
+
+  $id = $mysqli->insert_id;
+  getTask($id); // This will output the task directly to the frontend.
 
   $mysqli->close();
 }
