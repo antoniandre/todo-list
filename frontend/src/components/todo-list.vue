@@ -10,7 +10,9 @@
       <i :class=" task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
       <label>{{ task.label }}</label>
       <router-link :to="`/task/${task.id}`" class="arrow i-arrow-right"></router-link>
+      <button class="i-cross delete-button" @click="deleteTask(task.id)"></button>
     </li>
+    <!-- New task. -->
     <li ref="newTask" class="new-task" @click="newTask.completed = !newTask.completed">
       <i :class="newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
       <input
@@ -59,12 +61,24 @@ export default {
           completed: this.newTask.completed
         })
       })
-        .then(response => {
-          this.tasks.push({ ...this.newTask })
+        .then(response => response.json())
+        .then(taskFromDB => {
+          this.tasks.push(taskFromDB)
           this.newTask = Object.assign(this.newTask, { label: '', completed: false })
           this.$nextTick(() => {
             this.$refs.newTask.scrollIntoView({ behavior: 'smooth' })
           })
+        })
+    },
+
+    deleteTask (id) {
+      fetch('/api/', {
+        method: 'delete',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      })
+        .then(response => {
+          this.tasks = this.tasks.filter((item) => item.id !== id)
         })
     }
   },
@@ -75,15 +89,6 @@ export default {
       .then(response => {
         this.tasks = response
       })
-
-    // fetch('/api/', {
-    //   method: 'post',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify({ label: 'hello', completed: 1 })
-    // })
-    //   .then(response => {
-    //     console.log(response)
-    //   })
   }
 }
 </script>
@@ -140,6 +145,7 @@ export default {
   label {
     position: relative;
     margin-left: 8px;
+    cursor: inherit;
 
     &:before {
       content: '';
@@ -196,5 +202,23 @@ export default {
       aspect-ratio: 1;
     }
   }
+
+  .delete-button {
+    margin-left: 8px;
+    border-radius: 99em;
+    background-color: rgba(255, 0, 0, 0.35);
+    color: #fff;
+    border: none;
+    width: 1.5rem;
+    aspect-ratio: 1;
+    transition: 0.25s;
+    cursor: pointer;
+    opacity: 0;
+
+    &:hover {background-color: rgba(255, 0, 0, 0.6);}
+
+    &:before {padding-top: 3px;}
+  }
+  li:hover .delete-button {opacity: 1;}
 }
 </style>
