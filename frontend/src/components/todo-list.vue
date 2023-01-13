@@ -1,6 +1,7 @@
 <template>
 <div class="main-content todo-list">
   <h1>To Do List</h1>
+  <div v-if="error" class="error-message">Oops. Something went wrong.</div>
   <ul>
     <li
       v-for="task in tasks"
@@ -35,7 +36,8 @@ export default {
       id: null,
       label: '',
       completed: false
-    }
+    },
+    error: false
   }),
 
   methods: {
@@ -48,9 +50,9 @@ export default {
         .then(response => response.json())
         .then(response => {
           task.completed = response.completed
-          console.log(response)
           this.loading = false
         }).catch(error => {
+          this.error = true
           console.log(error)
         })
     },
@@ -72,6 +74,7 @@ export default {
             this.$refs.newTask.scrollIntoView({ behavior: 'smooth' })
           })
         }).catch(error => {
+          this.error = true
           console.log(error)
         })
     },
@@ -86,6 +89,7 @@ export default {
           this.tasks = this.tasks.filter((item) => item.id !== id)
         })
         .catch(error => {
+          this.error = true
           console.log(error)
         })
     }
@@ -98,6 +102,7 @@ export default {
         this.tasks = response.tasks
       })
       .catch(error => {
+        this.error = true
         console.log(error)
       })
   }

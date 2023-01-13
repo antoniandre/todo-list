@@ -4,8 +4,11 @@
     <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
     <h1>Task {{ task.id ? `#${task.id}` : 'not found' }}</h1>
   </div>
-  <p><strong>Label: </strong>{{ task.label }}</p>
-  <p><strong>completed: </strong>{{ task.completed }}</p>
+  <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <template v-else>
+    <p><strong>Label: </strong>{{ task.label }}</p>
+    <p><strong>completed: </strong>{{ task.completed }}</p>
+  </template>
 </div>
 </template>
 
@@ -20,7 +23,8 @@ export default {
       id: null,
       label: '',
       completed: false
-    }
+    },
+    errorMessage: ''
   }),
 
   created () {
@@ -41,6 +45,7 @@ export default {
       })
       .catch(error => {
         console.log(error)
+        this.errorMessage = 'Oops. Something went wrong.'
       })
   }
 }
