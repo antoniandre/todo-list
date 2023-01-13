@@ -14,7 +14,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     addTask($params->label, $params->completed);
     break;
   case 'PUT': // Update a task.
-    updateTask($params->id, $params->label ? $params->label : '', (bool)$params->completed);
+    updateTask($params->id, $params->label ?? '', (bool)$params->completed);
     break;
   case 'DELETE': // Delete a task.
     deleteTask($params->id);
@@ -34,7 +34,7 @@ header('Content-Type: application/json; charset=utf-8');
  *
  * @return \mysqli the MySQLi object.
  */
-function connectToDatabase() {
+function connectToDatabase(): \mysqli {
   $mysqli = new mysqli('127.0.0.1:3306', 'root', 'root', 'todo');
 
   if ($mysqli->connect_error) {
@@ -50,7 +50,7 @@ function connectToDatabase() {
  *
  * @return void
  */
-function getTasks () {
+function getTasks(): void {
   $mysqli = connectToDatabase();
   $sql = "SELECT * FROM tasks";
   $result = $mysqli->query($sql);
@@ -72,17 +72,23 @@ function getTasks () {
  * Get a task from the database given its id and output it as an object.
  *
  * @param integer $id the id of the task to get.
- * @return void
+ * @return bool
  */
-function getTask(int $id) {
+function getTask(int $id): bool {
   $mysqli = connectToDatabase();
   $id = (int)$id;
   $sql = "SELECT * FROM `tasks` WHERE `id` = $id";
   $result = $mysqli->query($sql);
   $task = $result->fetch_object();
 
-  if ($mysqli->error) return http_response_code(500);
-  elseif (!$task) return http_response_code(404);
+  if ($mysqli->error) {
+    http_response_code(500);
+    return false;
+  }
+  elseif (!$task) {
+    http_response_code(404);
+    return false;
+  }
 
   $task->id = (int)$task->id;
   $task->completed = (int)$task->completed;
@@ -91,6 +97,7 @@ function getTask(int $id) {
   http_response_code(200);
 
   $mysqli->close();
+  return true;
 }
 
 /**
@@ -100,7 +107,7 @@ function getTask(int $id) {
  * @param integer $completed: 0 or 1 for completed task.
  * @return void
  */
-function addTask(string $label, int $completed = 0) {
+function addTask(string $label, int $completed = 0): void {
   $mysqli = connectToDatabase();
   $label = $mysqli->real_escape_string($label);
   $completed = (int)$completed;
@@ -121,7 +128,7 @@ function addTask(string $label, int $completed = 0) {
  * @param integer $id the id of the task to delete.
  * @return void
  */
-function deleteTask(int $id) {
+function deleteTask(int $id): void {
   $mysqli = connectToDatabase();
   $id = (int)$id;
   $sql = "DELETE FROM `tasks` WHERE `id` = $id";
@@ -140,7 +147,7 @@ function deleteTask(int $id) {
  * @param integer $completed: 0 or 1 for a completed task.
  * @return void
  */
-function updateTask(int $id, string $label, int $completed) {
+function updateTask(int $id, string $label, int $completed): void {
   $mysqli = connectToDatabase();
   $id = (int)$id;
   $changes = [];
@@ -153,8 +160,8 @@ function updateTask(int $id, string $label, int $completed) {
 
   $mysqli->query($sql);
 
-  // echo json_encode($task);
-  http_response_code($mysqli->error ? 500 : 200);
+  if ($mysqli->error) http_response_code(500);
+  else getTask($id); // This will output the task directly to the frontend.
 
   $mysqli->close();
 }
