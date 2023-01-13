@@ -49,7 +49,7 @@ export default {
       })
         .then(response => response.json())
         .then(response => {
-          task.completed = response.completed
+          task.completed = response.task.completed
           this.loading = false
         }).catch(error => {
           this.error = true
@@ -67,8 +67,8 @@ export default {
         })
       })
         .then(response => response.json())
-        .then(taskFromDB => {
-          this.tasks.push(taskFromDB)
+        .then(response => {
+          this.tasks.push(response.task)
           this.newTask = Object.assign(this.newTask, { label: '', completed: false })
           this.$nextTick(() => {
             this.$refs.newTask.scrollIntoView({ behavior: 'smooth' })
