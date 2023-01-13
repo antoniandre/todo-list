@@ -3,6 +3,7 @@ This project is a full stack practice ground created during my workshops.
 
 > __Tech stack:__ JS, Vue.js 2 & Vue CLI, SCSS, PHP, MySQL.
 
+![Todo App preview](/frontend/public/todoapp-preview.png)
 ---
 
 ## Project setup
