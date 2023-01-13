@@ -7,7 +7,7 @@ $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'GET': // Get one or all tasks.
-    if (!empty($endpoint)) getTask((int)$endpoint);
+    if (!empty($endpoint)) getTask(is_numeric($endpoint) ? (int)$endpoint : 0);
     else getTasks();
     break;
   case 'POST': // Create a task.
@@ -52,18 +52,32 @@ function connectToDatabase(): \mysqli {
  */
 function getTasks(): void {
   $mysqli = connectToDatabase();
-  $sql = "SELECT * FROM tasks";
+  $sql = 'SELECT * FROM tasks';
   $result = $mysqli->query($sql);
+  $error = false;
+  $message = '';
+  $code = 200;
 
-  $rows = [];
-  while ($object = $result->fetch_object()) {
-    $object->id = (int)$object->id;
-    $object->completed = (bool)$object->completed;
-    array_push($rows, $object);
+  if ($mysqli->error) {
+    $error = true;
+    $message = 'Could not retrieve the tasks from the database.';
+    $code = 500;
+  }
+  else {
+    $rows = [];
+    while ($object = $result->fetch_object()) {
+      $object->id = (int)$object->id;
+      $object->completed = (bool)$object->completed;
+      array_push($rows, $object);
+    }
   }
 
-  echo json_encode($rows);
-  http_response_code(200);
+  echo json_encode((object)[
+    'error' => $error,
+    'message' => $message,
+    'tasks' => $rows ?? null
+  ]);
+  http_response_code($code);
 
   $mysqli->close();
 }
@@ -80,21 +94,31 @@ function getTask(int $id): bool {
   $sql = "SELECT * FROM `tasks` WHERE `id` = $id";
   $result = $mysqli->query($sql);
   $task = $result->fetch_object();
+  $error = false;
+  $message = '';
+  $code = 200;
 
   if ($mysqli->error) {
-    http_response_code(500);
-    return false;
+    $error = true;
+    $message = 'Could not read the task from the database.';
+    $code = 500;
   }
   elseif (!$task) {
-    http_response_code(404);
-    return false;
+    $error = true;
+    $message = 'The task was not found.';
+    $code = 404;
+  }
+  else {
+    $task->id = (int)$task->id;
+    $task->completed = (bool)$task->completed;
   }
 
-  $task->id = (int)$task->id;
-  $task->completed = (int)$task->completed;
-
-  echo json_encode($task);
-  http_response_code(200);
+  echo json_encode((object)[
+    'error' => $error,
+    'message' => $message,
+    'task' => $task ?? null
+  ]);
+  http_response_code($code);
 
   $mysqli->close();
   return true;
@@ -113,13 +137,22 @@ function addTask(string $label, int $completed = 0): void {
   $completed = (int)$completed;
   $sql = "INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)";
   $mysqli->query($sql);
+  $code = 200;
 
-  http_response_code($mysqli->error ? 500 : 201);
+  if ($mysqli->error) {
+    echo json_encode((object)[
+      'error' => true,
+      'message' => 'The task could not be saved to the database.'
+    ]);
+    $code = 500;
+    $mysqli->close();
+  }
+  else {
+    $success = getTask($mysqli->insert_id); // This will output the task directly to the frontend.
+    $code = $success ? 201 : 500; // Override the 200 from getTask.
+  }
 
-  $id = $mysqli->insert_id;
-  getTask($id); // This will output the task directly to the frontend.
-
-  $mysqli->close();
+  http_response_code($code);
 }
 
 /**
@@ -134,6 +167,10 @@ function deleteTask(int $id): void {
   $sql = "DELETE FROM `tasks` WHERE `id` = $id";
   $mysqli->query($sql);
 
+  echo json_encode((object)[
+    'error' => $mysqli->error,
+    'message' => $mysqli->error ? 'The task could not be saved to the database.' : ''
+  ]);
   http_response_code($mysqli->error ? 500 : 204);
 
   $mysqli->close();
@@ -160,10 +197,19 @@ function updateTask(int $id, string $label, int $completed): void {
 
   $mysqli->query($sql);
 
-  if ($mysqli->error) http_response_code(500);
-  else getTask($id); // This will output the task directly to the frontend.
+  if ($mysqli->error) {
+    echo json_encode((object)[
+      'error' => true,
+      'message' => 'The task could not be saved to the database.'
+    ]);
+    $mysqli->close();
+  }
+  else {
+    $success = getTask($id); // This will output the task directly to the frontend.
+    $code = $success ? 201 : 500; // Override the 200 from getTask.
+  }
 
-  $mysqli->close();
+  http_response_code($code);
 }
 // --------------------------------------------------------
 
