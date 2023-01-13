@@ -10,7 +10,7 @@
       <i :class=" task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
       <label>{{ task.label }}</label>
       <router-link :to="`/task/${task.id}`" class="arrow i-arrow-right"></router-link>
-      <button class="i-cross delete-button" @click="deleteTask(task.id)"></button>
+      <button class="i-cross delete-button" @click.stop="deleteTask(task.id)"></button>
     </li>
     <!-- New task. -->
     <li ref="newTask" class="new-task" @click="newTask.completed = !newTask.completed">
@@ -40,15 +40,18 @@ export default {
 
   methods: {
     saveTask (task) {
-      task.completed = !task.completed
-
       fetch('/api/', {
         method: 'put',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: task.id, completed: task.completed })
+        body: JSON.stringify({ id: task.id, completed: !task.completed })
       })
+        .then(response => response.json())
         .then(response => {
+          task.completed = response.completed
           console.log(response)
+          this.loading = false
+        }).catch(error => {
+          console.log(error)
         })
     },
 
@@ -68,6 +71,8 @@ export default {
           this.$nextTick(() => {
             this.$refs.newTask.scrollIntoView({ behavior: 'smooth' })
           })
+        }).catch(error => {
+          console.log(error)
         })
     },
 
@@ -80,6 +85,9 @@ export default {
         .then(response => {
           this.tasks = this.tasks.filter((item) => item.id !== id)
         })
+        .catch(error => {
+          console.log(error)
+        })
     }
   },
 
@@ -87,7 +95,10 @@ export default {
     fetch('/api/', { method: 'get' })
       .then(response => response.json())
       .then(response => {
-        this.tasks = response
+        this.tasks = response.tasks
+      })
+      .catch(error => {
+        console.log(error)
       })
   }
 }

@@ -2,7 +2,7 @@
 <div class="main-content todo-task">
   <div class="title-wrap d-flex align-center">
     <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
-    <h1>Task #{{ task.id }}</h1>
+    <h1>Task {{ task.id ? `#${task.id}` : 'not found' }}</h1>
   </div>
   <p><strong>Label: </strong>{{ task.label }}</p>
   <p><strong>completed: </strong>{{ task.completed }}</p>
@@ -27,9 +27,20 @@ export default {
     fetch(`/api/${this.id}`, {
       method: 'get'
     })
-      .then(response => response.json())
       .then(response => {
-        this.task = response
+        if (!response.ok) {
+          if (response.status === 404) this.errorMessage = 'Task not found.'
+          else this.errorMessage = 'Oops. Something went wrong.'
+
+          throw new Error(this.errorMessage)
+        }
+        return response.json()
+      })
+      .then(response => {
+        this.task = response.task
+      })
+      .catch(error => {
+        console.log(error)
       })
   }
 }
