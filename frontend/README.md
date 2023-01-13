@@ -1,24 +1,33 @@
 # todolist
+This project is a full stack practice ground created during my workshops.
+
+> __Tech stack:__ JS, Vue.js 2 & Vue CLI, SCSS, PHP, MySQL.
+
+---
 
 ## Project setup
-```
-npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
+__Backend:__
+- Create a MySQL database called `todo` and update the credentials in the index.php file.
 
-### Compiles and minifies for production
-```
-npm run build
-```
+__Frontend:__
+- `cd frontend`
+- `pnpm i`
 
-### Lints and fixes files
-```
-npm run lint
-```
+## Running the project
+- Needs Apache running on port `:80` (or update the proxy in the vue.config.js)
+- from the `frontend/` dir:
+  ### Compiles and hot-reloads for development
+  ```
+  pnpm run serve
+  ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+  ### Compiles and minifies for production
+  ```
+  pnpm run build
+  ```
+
+  ### Lints and fixes files
+  ```
+  pnpm run lint
+  ```
