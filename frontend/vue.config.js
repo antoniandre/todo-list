@@ -9,5 +9,13 @@ module.exports = defineConfig({
         pathRewrite: { '^/api': '' }
       }
     }
+  },
+
+  css: {
+    loaderOptions: {
+      scss: {
+        additionalData: '@import "@/scss/_variables.scss";'
+      }
+    }
   }
 })
