@@ -14,7 +14,11 @@
       <button class="i-cross delete-button" @click.stop="deleteTask(task.id)"></button>
     </li>
     <!-- New task. -->
-    <li ref="newTask" class="new-task" @click="newTask.completed = !newTask.completed">
+    <li
+      ref="newTask"
+      class="new-task"
+      :class="{ checked: newTask.completed }"
+      @click="newTask.completed = !newTask.completed">
       <i :class="newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
       <input
         v-model="newTask.label"
@@ -155,7 +159,7 @@ export default {
       opacity: 0;
     }
   }
-  .checked i {color: #009688;}
+  .checked i {color: $completed-color;}
   li:hover i:after {opacity: 0.25;}
 
   label {
@@ -170,13 +174,13 @@ export default {
       left: 0;
       width: 0;
       transform: translateY(-50%);
-      border-top: 1px solid #009688;
+      border-top: 1px solid $completed-color;
       transition: 0.2s ease-in-out;
     }
   }
 
   .checked label {
-    color: #009688;
+    color: $completed-color;
 
     &:before {width: 100%;}
   }
@@ -207,18 +211,6 @@ export default {
     &:before {padding-top: 0.2rem;}
   }
 
-  .new-task {
-    input {margin: 0 8px;}
-    button {
-      margin-left: auto;
-      border-radius: 99em;
-      background-color: rgba(255, 255, 255, 0.6);
-      border: none;
-      width: 1.5rem;
-      aspect-ratio: 1;
-    }
-  }
-
   .delete-button {
     margin-left: 8px;
     border-radius: 99em;
@@ -236,5 +228,42 @@ export default {
     &:before {padding-top: 3px;}
   }
   li:hover .delete-button {opacity: 1;}
+
+  .new-task {
+    i, button {flex-shrink: 0;}
+
+    input {
+      margin: 0 8px;
+      border: none;
+      background: rgb(255 255 255 / 30%);
+      padding: 6px 8px;
+      width: 100%;
+      border-radius: 4px;
+      outline: none;
+    }
+    &.checked input {
+      color: rgba(0, 150, 136, 0.5);
+      text-decoration: line-through;
+    }
+
+    button {
+      margin-left: auto;
+      border-radius: 99em;
+      border: none;
+      background-color: rgba($completed-color, 0.5);
+      width: 1.5rem;
+      aspect-ratio: 1;
+      color: #fff;
+      cursor: pointer;
+      opacity: 0;
+      outline: none;
+      font-size: 12px;
+      transition: 0.3s;
+
+      &:hover {background-color: rgba($completed-color, 0.8);}
+    }
+
+    &:hover button {opacity: 1;}
+  }
 }
 </style>
