@@ -35,7 +35,13 @@ header('Content-Type: application/json; charset=utf-8');
  * @return \mysqli the MySQLi object.
  */
 function connectToDatabase(): \mysqli {
-  $mysqli = new mysqli('127.0.0.1:3306', 'root', 'root', 'todo');
+  $config = (object)parse_ini_file('./config.ini');
+  $mysqli = new mysqli(
+    $config->databaseHost,
+    $config->databaseUsername,
+    $config->databasePassword,
+    $config->databaseName
+  );
 
   if ($mysqli->connect_error) {
     error_log($mysqli->connect_error);
