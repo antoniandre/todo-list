@@ -1,25 +1,25 @@
 <template>
-<div class="main-content todo-list">
-  <h1>To Do List</h1>
-  <div v-if="error" class="error-message">Oops. Something went wrong.</div>
-  <ul>
+<div class="main-content main-content--todo-list">
+  <h1 class="main-content__title">To Do List</h1>
+  <div v-if="error" class="message message--error">Oops. Something went wrong.</div>
+  <ul class="tasks">
     <li
       v-for="task in tasks"
       :key="task.id"
       @click="saveTask(task)"
-      :class="{ checked: task.completed }">
-      <i :class=" task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
-      <label>{{ task.label }}</label>
-      <router-link :to="`/task/${task.id}`" class="arrow i-arrow-right"></router-link>
-      <button class="i-cross delete-button" @click.stop="deleteTask(task.id)"></button>
+      :class="{ 'task': true, 'task--completed': task.completed }">
+      <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
+      <label class="task__label">{{ task.label }}</label>
+      <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right"></router-link>
+      <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
     </li>
     <!-- New task. -->
     <li
       ref="newTask"
-      class="new-task"
+      class="task task--new"
       :class="{ checked: newTask.completed }"
       @click="newTask.completed = !newTask.completed">
-      <i :class="newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'"></i>
+      <i :class="`task__icon ${newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
       <input
         v-model="newTask.label"
         @click.stop
@@ -114,22 +114,22 @@ export default {
 </script>
 
 <style lang="scss">
-.todo-list {
+.main-content--todo-list {
   padding-top: 0;
   overflow: hidden;
 
-  h1 {
+  .main-content__title {
     margin: 20px 0 10px;
     text-align: center;
   }
 
-  ul {
+  .tasks {
     list-style-type: none;
     overflow: auto;
     max-height: 40vh;
   }
 
-  li {
+  .task {
     display: flex;
     align-items: center;
     padding: 5px 30px;
@@ -139,7 +139,7 @@ export default {
     &:hover {background-color: rgba(255, 255, 255, 0.2);}
   }
 
-  i {
+  .task__icon {
     position: relative;
     font-size: 20px;
     width: 1.5rem;
@@ -159,10 +159,11 @@ export default {
       opacity: 0;
     }
   }
-  .checked i {color: $completed-color;}
-  li:hover i:after {opacity: 0.25;}
 
-  label {
+  .task--completed .task__icon {color: $completed-color;}
+  .task:hover .task__icon:after {opacity: 0.25;}
+
+  .task__label {
     position: relative;
     margin-left: 8px;
     cursor: inherit;
@@ -179,7 +180,7 @@ export default {
     }
   }
 
-  .checked label {
+  .task--completed .task__label {
     color: $completed-color;
 
     &:before {width: 100%;}
@@ -211,7 +212,7 @@ export default {
     &:before {padding-top: 0.2rem;}
   }
 
-  .delete-button {
+  .task__delete {
     margin-left: 8px;
     border-radius: 99em;
     background-color: rgba(255, 0, 0, 0.35);
@@ -227,9 +228,9 @@ export default {
 
     &:before {padding-top: 3px;}
   }
-  li:hover .delete-button {opacity: 1;}
+  .task:hover .task__delete {opacity: 1;}
 
-  .new-task {
+  .task--new {
     i, button {flex-shrink: 0;}
 
     input {
