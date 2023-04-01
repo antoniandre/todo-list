@@ -1,10 +1,10 @@
 <template>
-<div class="main-content todo-task">
-  <div class="title-wrap d-flex align-center">
+<div class="main-content main-content--todo-task">
+  <div class="main-content__title d-flex align-center">
     <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
     <h1>Task {{ task.id ? `#${task.id}` : 'not found' }}</h1>
   </div>
-  <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
+  <div v-if="errorMessage" class="message message--error">{{ errorMessage }}</div>
   <template v-else>
     <p><strong>Label: </strong>{{ task.label }}</p>
     <p><strong>completed: </strong>{{ task.completed }}</p>
@@ -52,10 +52,10 @@ export default {
 </script>
 
 <style lang="scss">
-.todo-task {
+.main-content--todo-task {
   padding: 40px;
 
-  .title-wrap {margin-bottom: 1rem;}
+  .main-content__title {margin-bottom: 1rem;}
 
   .back-arrow {
     text-decoration: none;

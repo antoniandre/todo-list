@@ -83,10 +83,13 @@ footer {
 .d-flex.align-center {align-items: center;}
 .d-flex.justify-center {justify-content: center;}
 
-.error-message {
-  color: #cf1616;
-  background: rgba(255, 160, 160, 0.7);
+.message {
   padding: 6px 0;
   text-align: center;
   margin-bottom: 8px;
+
+  &--error {
+    color: #cf1616;
+    background: rgba(255, 160, 160, 0.7);
+  }
 }
