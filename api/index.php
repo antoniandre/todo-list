@@ -7,24 +7,39 @@ $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
 
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'GET': // Get one or all tasks.
-    if (!empty($endpoint)) getTask(is_numeric($endpoint) ? (int)$endpoint : 0);
-    else getTasks();
+    if (!empty($endpoint)) {
+      list($code, $message, $task) = getTask(is_numeric($endpoint) ? (int)$endpoint : 0);
+      $data = ['task' => $task ?? null];
+    }
+    else {
+      list($code, $message, $tasks) = getTasks();
+      $data = ['tasks' => $tasks ?? null];
+    }
+
+    if ($code === 200) {
+      list($code, $message, $users) = getUsers();
+      $data['users'] = $users;
+    }
     break;
   case 'POST': // Create a task.
-    addTask($params->label, $params->completed);
+    list($code, $message, $task) = addTask($params->label, $params->completed);
+    $data = ['task' => $task ?? null];
     break;
   case 'PUT': // Update a task.
-    updateTask($params->id, $params->label ?? '', (bool)$params->completed);
+    list($code, $message, $task) = updateTask($params->id, $params->label ?? '', (bool)$params->completed);
+    $data = ['task' => $task ?? null];
     break;
   case 'DELETE': // Delete a task.
-    deleteTask($params->id);
+    list($code, $message, $task) = deleteTask($params->id);
+    $data = ['task' => $task ?? null];
     break;
   default:
     http_response_code(405); // Method not allowed.
     break;
 }
 
-header('Content-Type: application/json; charset=utf-8');
+output($code, $message, $data ?? null);
+connectToDatabase()->close();
 // --------------------------------------------------------
 
 // Functions.
@@ -51,21 +66,26 @@ function connectToDatabase(): \mysqli {
   return $mysqli;
 }
 
+function output(int $code, string $message, $data = []): void {
+  $output = ['error' => $code !== 200, 'message' => $message];
+  $output = array_merge($output, $data);
+
+  echo json_encode((object)$output);
+  http_response_code($code);
+  header('Content-Type: application/json; charset=utf-8');
+}
+
 /**
  * Get all the tasks from the database and outputs them in an array of objects.
  *
  * @return void
  */
-function getTasks(): void {
+function getTasks(): array {
   $mysqli = connectToDatabase();
   $sql = 'SELECT * FROM tasks';
   $result = $mysqli->query($sql);
-  $error = false;
-  $message = '';
-  $code = 200;
 
   if ($mysqli->error) {
-    $error = true;
     $message = 'Could not retrieve the tasks from the database.';
     $code = 500;
   }
@@ -78,39 +98,25 @@ function getTasks(): void {
     }
   }
 
-  echo json_encode((object)[
-    'error' => $error,
-    'message' => $message,
-    'tasks' => $rows ?? null
-  ]);
-  http_response_code($code);
-
-  $mysqli->close();
+  return [$code ?? 200, $message, $rows ?? null];
 }
 
 /**
  * Get a task from the database given its id and output it as an object.
  *
  * @param integer $id the id of the task to get.
- * @return bool
+ * @return array
  */
-function getTask(int $id): bool {
+function getTask(int $id): array {
   $mysqli = connectToDatabase();
-  $id = (int)$id;
-  $sql = "SELECT * FROM `tasks` WHERE `id` = $id";
-  $result = $mysqli->query($sql);
+  $result = $mysqli->query("SELECT * FROM `tasks` WHERE `id` = " . (int)$id);
   $task = $result->fetch_object();
-  $error = false;
-  $message = '';
-  $code = 200;
 
   if ($mysqli->error) {
-    $error = true;
     $message = 'Could not read the task from the database.';
     $code = 500;
   }
   elseif (!$task) {
-    $error = true;
     $message = 'The task was not found.';
     $code = 404;
   }
@@ -119,15 +125,7 @@ function getTask(int $id): bool {
     $task->completed = (bool)$task->completed;
   }
 
-  echo json_encode((object)[
-    'error' => $error,
-    'message' => $message,
-    'task' => $task ?? null
-  ]);
-  http_response_code($code);
-
-  $mysqli->close();
-  return true;
+  return [$code ?? 200, $message ?? '', $task];
 }
 
 /**
@@ -137,28 +135,19 @@ function getTask(int $id): bool {
  * @param integer $completed: 0 or 1 for completed task.
  * @return void
  */
-function addTask(string $label, int $completed = 0): void {
+function addTask(string $label, int $completed = 0): array {
   $mysqli = connectToDatabase();
   $label = $mysqli->real_escape_string($label);
   $completed = (int)$completed;
-  $sql = "INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)";
-  $mysqli->query($sql);
-  $code = 200;
+  $mysqli->query("INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)");
 
   if ($mysqli->error) {
-    echo json_encode((object)[
-      'error' => true,
-      'message' => 'The task could not be saved to the database.'
-    ]);
+    $message = 'The task could not be saved in the database.';
     $code = 500;
-    $mysqli->close();
   }
-  else {
-    $success = getTask($mysqli->insert_id); // This will output the task directly to the frontend.
-    $code = $success ? 201 : 500; // Override the 200 from getTask.
-  }
+  else list($code, $message, $task) = getTask($mysqli->insert_id);
 
-  http_response_code($code);
+  return [$code, $message, $task ?? null];
 }
 
 /**
@@ -167,19 +156,11 @@ function addTask(string $label, int $completed = 0): void {
  * @param integer $id the id of the task to delete.
  * @return void
  */
-function deleteTask(int $id): void {
+function deleteTask(int $id): array {
   $mysqli = connectToDatabase();
-  $id = (int)$id;
-  $sql = "DELETE FROM `tasks` WHERE `id` = $id";
-  $mysqli->query($sql);
+  $mysqli->query("DELETE FROM `tasks` WHERE `id` = ". (int)$id);
 
-  echo json_encode((object)[
-    'error' => $mysqli->error,
-    'message' => $mysqli->error ? 'The task could not be saved to the database.' : ''
-  ]);
-  http_response_code($mysqli->error ? 500 : 204);
-
-  $mysqli->close();
+  return [$mysqli->error ? 500 : 204, $mysqli->error ? 'The task could not be saved to the database.' : ''];
 }
 
 /**
@@ -190,7 +171,7 @@ function deleteTask(int $id): void {
  * @param integer $completed: 0 or 1 for a completed task.
  * @return void
  */
-function updateTask(int $id, string $label, int $completed): void {
+function updateTask(int $id, string $label, int $completed): array {
   $mysqli = connectToDatabase();
   $id = (int)$id;
   $changes = [];
@@ -199,24 +180,45 @@ function updateTask(int $id, string $label, int $completed): void {
     $changes[] = "`label` = '$label'";
   }
   if ($completed !== '') $changes[] = "`completed` = $completed";
-  $sql = "UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $id";
 
-  $mysqli->query($sql);
+  $mysqli->query("UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $id");
 
   if ($mysqli->error) {
-    echo json_encode((object)[
-      'error' => true,
-      'message' => 'The task could not be saved to the database.'
-    ]);
-    $mysqli->close();
+    $message = 'The task could not be saved in the database.';
+    $code = 500;
   }
   else {
-    $success = getTask($id); // This will output the task directly to the frontend.
-    $code = $success ? 201 : 500; // Override the 200 from getTask.
+    list($code, $message, $task) = getTask($id);
+    $code = $code === 200 ? 201 : 500; // Override the 200 from getTask.
   }
 
-  http_response_code($code);
+  return [$code, $message, $task ?? null];
 }
+
+/**
+ * Get all the users from the database and outputs them in an array of objects.
+ *
+ * @return void
+ */
+function getUsers(): array {
+  $mysqli = connectToDatabase();
+  $result = $mysqli->query('SELECT * FROM users');
+
+  if ($mysqli->error) {
+    $message = 'Could not retrieve the users from the database.';
+    $code = 500;
+  }
+  else {
+    $rows = [];
+    while ($object = $result->fetch_object()) {
+      $object->id = (int)$object->id;
+      array_push($rows, $object);
+    }
+  }
+
+  return [$code ?? 200, $message ?? '', $rows ?? null];
+}
+
 // --------------------------------------------------------
 
 ?>
