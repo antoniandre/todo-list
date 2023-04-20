@@ -9,6 +9,9 @@
     <p><strong>Label: </strong>{{ task.label }}</p>
     <p><strong>completed: </strong>{{ task.completed }}</p>
   </template>
+  <ul>
+    <li v-for="(user, i) in users" :key="i">{{ user }}</li>
+  </ul>
 </div>
 </template>
 
@@ -24,6 +27,7 @@ export default {
       label: '',
       completed: false
     },
+    users: [],
     errorMessage: ''
   }),
 
@@ -42,6 +46,7 @@ export default {
       })
       .then(response => {
         this.task = response.task
+        this.users = response.users
       })
       .catch(error => {
         console.log(error)
