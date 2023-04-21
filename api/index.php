@@ -16,7 +16,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
       $data = ['tasks' => $tasks ?? null];
     }
 
-    if ($code === 200) {
+    if ($code >= 200 && $code < 300) {
       list($code, $message, $users) = getUsers();
       $data['users'] = $users;
     }
@@ -30,15 +30,15 @@ switch ($_SERVER['REQUEST_METHOD']) {
     $data = ['task' => $task ?? null];
     break;
   case 'DELETE': // Delete a task.
-    list($code, $message, $task) = deleteTask($params->id);
-    $data = ['task' => $task ?? null];
+    list($code, $message) = deleteTask($params->id);
     break;
   default:
-    http_response_code(405); // Method not allowed.
+    $code = 405; // Method not allowed.
+    $message = 'Method not allowed.';
     break;
 }
 
-output($code, $message, $data ?? null);
+output($code, $message, $data ?? []);
 connectToDatabase()->close();
 // --------------------------------------------------------
 
@@ -66,8 +66,16 @@ function connectToDatabase(): \mysqli {
   return $mysqli;
 }
 
-function output(int $code, string $message, $data = []): void {
-  $output = ['error' => $code !== 200, 'message' => $message];
+/**
+ * Outputs the JSON payload to the frontend with correct response code.
+ *
+ * @param integer $code the response code to send back to the frontend.
+ * @param string $message a potential message in case of error.
+ * @param array $data some data to send back to the frontend if any.
+ * @return void
+ */
+function output(int $code, string $message, array $data = []): void {
+  $output = ['error' => $code < 200 || $code >= 300, 'message' => $message];
   $output = array_merge($output, $data);
 
   echo json_encode((object)$output);
@@ -78,7 +86,7 @@ function output(int $code, string $message, $data = []): void {
 /**
  * Get all the tasks from the database and outputs them in an array of objects.
  *
- * @return void
+ * @return array of [int $code, ?string $message, array|null $data]
  */
 function getTasks(): array {
   $mysqli = connectToDatabase();
@@ -98,7 +106,7 @@ function getTasks(): array {
     }
   }
 
-  return [$code ?? 200, $message, $rows ?? null];
+  return [$code ?? 200, $message ?? '', $rows ?? null];
 }
 
 /**
@@ -133,7 +141,7 @@ function getTask(int $id): array {
  *
  * @param string $label the task label.
  * @param integer $completed: 0 or 1 for completed task.
- * @return void
+ * @return array of [int $code, ?string $message, array|null $data]
  */
 function addTask(string $label, int $completed = 0): array {
   $mysqli = connectToDatabase();
@@ -154,13 +162,13 @@ function addTask(string $label, int $completed = 0): array {
  * Delete a task from the database.
  *
  * @param integer $id the id of the task to delete.
- * @return void
+ * @return array of [int $code, ?string $message, array|null $data]
  */
 function deleteTask(int $id): array {
   $mysqli = connectToDatabase();
   $mysqli->query("DELETE FROM `tasks` WHERE `id` = ". (int)$id);
 
-  return [$mysqli->error ? 500 : 204, $mysqli->error ? 'The task could not be saved to the database.' : ''];
+  return [$mysqli->error ? 500 : 204, $mysqli->error ? 'The task could not be deleted from the database.' : ''];
 }
 
 /**
@@ -169,7 +177,7 @@ function deleteTask(int $id): array {
  * @param integer $id the id of the task to update.
  * @param string $label the new task label.
  * @param integer $completed: 0 or 1 for a completed task.
- * @return void
+ * @return array of [int $code, ?string $message, array|null $data]
  */
 function updateTask(int $id, string $label, int $completed): array {
   $mysqli = connectToDatabase();
@@ -198,7 +206,7 @@ function updateTask(int $id, string $label, int $completed): array {
 /**
  * Get all the users from the database and outputs them in an array of objects.
  *
- * @return void
+ * @return array of [int $code, ?string $message, array|null $data]
  */
 function getUsers(): array {
   $mysqli = connectToDatabase();
@@ -216,7 +224,7 @@ function getUsers(): array {
     }
   }
 
-  return [$code ?? 200, $message ?? '', $rows ?? null];
+  return [$code ?? 200, $message ?? '', $rows ?? []];
 }
 
 // --------------------------------------------------------
