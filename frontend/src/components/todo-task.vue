@@ -2,16 +2,21 @@
 <div class="main-content main-content--todo-task">
   <div class="main-content__title d-flex align-center">
     <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
-    <h1>Task {{ task.id ? `#${task.id}` : 'not found' }}</h1>
+    <h1 v-html="task.id ? task.label : 'not found'"></h1>
   </div>
   <div v-if="errorMessage" class="message message--error">{{ errorMessage }}</div>
   <template v-else>
     <p><strong>Label: </strong>{{ task.label }}</p>
     <p><strong>completed: </strong>{{ task.completed }}</p>
   </template>
-  <ul>
-    <li v-for="(user, i) in users" :key="i">{{ user }}</li>
-  </ul>
+  <p>
+    <strong>Assignee: </strong>
+    <select>
+      <option v-for="user in users" :key="user.id" :value="user.id">
+        {{ user.firstName }} {{ user.lastName }}
+      </option>
+    </select>
+  </p>
 </div>
 </template>
 
