@@ -11,7 +11,7 @@
   </template>
   <p>
     <strong>Assignee: </strong>
-    <select>
+    <select v-model="task.assignee">
       <option v-for="user in users" :key="user.id" :value="user.id">
         {{ user.firstName }} {{ user.lastName }}
       </option>
@@ -30,7 +30,8 @@ export default {
     task: {
       id: null,
       label: '',
-      completed: false
+      completed: false,
+      assignee: null
     },
     users: [],
     errorMessage: ''

@@ -1,5 +1,7 @@
 <?php
 
+include_once __DIR__ . '/classes/task.php';
+
 // MAIN.
 // --------------------------------------------------------
 $params = json_decode(file_get_contents('php://input'));
@@ -8,11 +10,14 @@ $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'GET': // Get one or all tasks.
     if (!empty($endpoint)) {
-      list($code, $message, $task) = getTask(is_numeric($endpoint) ? (int)$endpoint : 0);
+      $task = Task::get(is_numeric($endpoint) ? (int)$endpoint : 0);
+      if (is_array($task)) list($code, $message) = $task;
+      else $code = 200;
       $data = ['task' => $task ?? null];
     }
     else {
-      list($code, $message, $tasks) = getTasks();
+      // @todo: getAll should only return an array of tasks.
+      list($code, $message, $tasks) = Task::getAll();
       $data = ['tasks' => $tasks ?? null];
     }
 
@@ -22,15 +27,19 @@ switch ($_SERVER['REQUEST_METHOD']) {
     }
     break;
   case 'POST': // Create a task.
-    list($code, $message, $task) = addTask($params->label, $params->completed);
-    $data = ['task' => $task ?? null];
+    $task = new Task($params->label, $params->completed, $params->assignee ?? null);
+    $task = $task->save();
+    if (is_array($task)) list($code, $message) = $task;
+    $data = ['task' => is_array($task) ? null : $task];
     break;
   case 'PUT': // Update a task.
-    list($code, $message, $task) = updateTask($params->id, $params->label ?? '', (bool)$params->completed);
-    $data = ['task' => $task ?? null];
+    $task = Task::get($params->id);
+    $task = $task->update($params->label, $params->completed, $params->assignee);
+    if (is_array($task)) list($code, $message) = $task;
+    $data = ['task' => isset($code) ? null : $task];
     break;
   case 'DELETE': // Delete a task.
-    list($code, $message) = deleteTask($params->id);
+    list($code, $message) = Task::deleteById($params->id);
     break;
   default:
     $code = 405; // Method not allowed.
@@ -38,7 +47,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
 }
 
-output($code, $message, $data ?? []);
+output($code ?? 200, $message ?? '', $data ?? []);
 connectToDatabase()->close();
 // --------------------------------------------------------
 
