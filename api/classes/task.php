@@ -1,30 +1,36 @@
 <?php
 
 class Task {
-  public function __construct() {
+  public $id;
+  public $label;
+  public $completed;
+  public $assignee;
 
+  public function __construct(string $label, bool $completed, ?int $assignee, ?int $id = null) {
+    $this->id = $id;
+    $this->label = $label;
+    $this->completed = $completed;
+    $this->assignee = $assignee;
   }
 
   /**
    * Get all the tasks from the database and outputs them in an array of objects.
    *
-   * @return array of [int $code, ?string $message, array|null $data]
+   * @return array of [int $code, ?string $message, array|null $tasks]
    */
   public static function getAll(): array {
-    $mysqli = connectToDatabase();
-    $sql = 'SELECT * FROM tasks';
-    $result = $mysqli->query($sql);
+    $db = connectToDatabase();
+    $result = $db->query('SELECT * FROM tasks');
 
-    if ($mysqli->error) {
+    if ($db->error) {
       $message = 'Could not retrieve the tasks from the database.';
       $code = 500;
     }
     else {
       $rows = [];
       while ($object = $result->fetch_object()) {
-        $object->id = (int)$object->id;
-        $object->completed = (bool)$object->completed;
-        array_push($rows, $object);
+        $task = new self($object->label, (bool)$object->completed, $object->assignee, (int)$object->id);
+        $rows[] = $task;
       }
     }
 
@@ -35,100 +41,84 @@ class Task {
    * Get a task from the database given its id and output it as an object.
    *
    * @param integer $id the id of the task to get.
-   * @return array
+   * @return Task|array The task instance if it worked, or an error of [int $error, string $message].
    */
-  public static function get(int $id): array {
-    $mysqli = connectToDatabase();
-    $result = $mysqli->query("SELECT * FROM `tasks` WHERE `id` = " . (int)$id);
+  public static function get(int $id): Task|array {
+    $db = connectToDatabase();
+    $result = $db->query("SELECT * FROM `tasks` WHERE `id` = " . (int)$id);
     $task = $result->fetch_object();
 
-    if ($mysqli->error) {
-      $message = 'Could not read the task from the database.';
-      $code = 500;
-    }
-    elseif (!$task) {
-      $message = 'The task was not found.';
-      $code = 404;
-    }
-    else {
-      $task->id = (int)$task->id;
-      $task->completed = (bool)$task->completed;
-    }
-
-    return [$code ?? 200, $message ?? '', $task];
+    if ($db->error) return [500, 'Could not read the task from the database.'];
+    elseif (!$task) return [404, 'The task was not found.'];
+    else return new self($task->label, (bool)$task->completed, $task->assignee, (int)$task->id);
   }
 
   /**
-   * Create a task in the database, and outputs the new task to the frontend.
+   * Saves a task instance in the database, and return an array with a code and $message.
    *
-   * @param string $label the task label.
-   * @param integer $completed: 0 or 1 for completed task.
-   * @return array of [int $code, ?string $message, array|null $data]
+   * @return Task|array The task instance if it worked, or an error of [int $error, string $message].
    */
-  public static function create(string $label, int $completed = 0): array {
-    $mysqli = connectToDatabase();
-    $label = $mysqli->real_escape_string($label);
-    $completed = (int)$completed;
-    $mysqli->query("INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)");
+  public function save(): Task|array {
+    $db = connectToDatabase();
+    $label = $db->real_escape_string($this->label);
+    $completed = (int)$this->completed;
+    $db->query("INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)");
 
-    if ($mysqli->error) {
-      $message = 'The task could not be saved in the database.';
-      $code = 500;
+    if ($db->error) {
+      return [500, 'The task could not be saved in the database.'];
     }
-    else list($code, $message, $task) = self::get($mysqli->insert_id);
+    // Read from DB in case the insertion in DB results in different values of the task (e.g. cascading actions from FK).
+    else return self::get($db->insert_id);
+  }
 
-    return [$code, $message, $task ?? null];
+  /**
+   * Delete the current task instance from the database.
+   *
+   * @return array of [int $code, ?string $message]
+   */
+  public function delete(): array {
+    return self::deleteById($this->id);
   }
 
   /**
    * Delete a task from the database.
    *
    * @param integer $id the id of the task to delete.
-   * @return array of [int $code, ?string $message, array|null $data]
+   * @return array of [int $code, ?string $message]
    */
-  public function delete(int $id): array {
-    $mysqli = connectToDatabase();
-    $mysqli->query("DELETE FROM `tasks` WHERE `id` = ". (int)$id);
+  public static function deleteById(int $id): array {
+    $db = connectToDatabase();
+    $db->query("DELETE FROM `tasks` WHERE `id` = $id");
 
-    return [$mysqli->error ? 500 : 204, $mysqli->error ? 'The task could not be deleted from the database.' : ''];
+    return [$db->error ? 500 : 204, $db->error ? 'The task could not be deleted from the database.' : ''];
   }
 
   /**
    * Update a task in the database.
    *
-   * @param integer $id the id of the task to update.
    * @param string $label the new task label.
    * @param integer $completed: 0 or 1 for a completed task.
-   * @return array of [int $code, ?string $message, array|null $data]
+   * @param integer $assignee: the user id.
+   * @return Task|array The task instance if it worked, or an error of [int $error, string $message].
    */
-  function update(int $id, string $label, int $completed): array {
-    $mysqli = connectToDatabase();
-    $id = (int)$id;
+  function update(?string $label, ?bool $completed, ?int $assignee): Task|array {
+    $db = connectToDatabase();
+
     $changes = [];
-    if ($label !== '') {
-      $label = $mysqli->real_escape_string($label);
+    if ($label) {
+      $label = $db->real_escape_string($label);
       $changes[] = "`label` = '$label'";
     }
-    if ($completed !== '') $changes[] = "`completed` = $completed";
+    if (is_bool($completed)) $changes[] = "`completed` = " . (int)$completed;
+    if (is_int($assignee)) $changes[] = "`assignee` = $assignee";
 
-    $mysqli->query("UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $id");
+    $db->query("UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $this->id");
 
-    if ($mysqli->error) {
-      $message = 'The task could not be saved in the database.';
-      $code = 500;
-    }
-    else {
-      list($code, $message, $task) = self::get($id);
-      $code = $code === 200 ? 201 : 500; // Override the 200 from getTask.
-    }
+    if ($db->error) return [500, 'The task could not be saved in the database.'];
 
-    return [$code, $message, $task ?? null];
+    // Read from DB in case the update in DB results in different values of the task (e.g. cascading actions from FK).
+    else return self::get($this->id);
   }
 }
-
-// new Task(label, );
-
-// Task::get(2);
-// Task::getAll();
 
 ?>
