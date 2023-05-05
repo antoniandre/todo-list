@@ -1,6 +1,9 @@
 <?php
 
-include_once __DIR__ . '/classes/task.php';
+// Autoload the PHP classes.
+spl_autoload_register(function ($className) {
+  include __DIR__ . '/classes/' . strtolower($className) . '.php';
+});
 
 // MAIN.
 // --------------------------------------------------------
@@ -10,36 +13,69 @@ $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
 switch ($_SERVER['REQUEST_METHOD']) {
   case 'GET': // Get one or all tasks.
     if (!empty($endpoint)) {
-      $task = Task::get(is_numeric($endpoint) ? (int)$endpoint : 0);
-      if (is_array($task)) list($code, $message) = $task;
-      else $code = 200;
+      try {
+        $task = Task::get(is_numeric($endpoint) ? (int)$endpoint : 0);
+        $code = 200;
+      }
+      catch (Exception $e) {
+        $code = $e->getCode();
+        $message = $e->getMessage();
+      }
       $data = ['task' => $task ?? null];
     }
     else {
-      // @todo: getAll should only return an array of tasks.
-      list($code, $message, $tasks) = Task::getAll();
+      try {
+        $tasks = Task::getAll();
+        $code = 200;
+      }
+      catch (Exception $e) {
+        $code = $e->getCode();
+        $message = $e->getMessage();
+      }
       $data = ['tasks' => $tasks ?? null];
     }
 
-    if ($code >= 200 && $code < 300) {
-      list($code, $message, $users) = getUsers();
-      $data['users'] = $users;
+    if ($code === 200) {
+      try {
+        $users = User::getAll();
+      }
+      catch (Exception $e) {
+        $code = $e->getCode();
+        $message = $e->getMessage();
+      }
+      $data['users'] = $users ?? [];
     }
     break;
   case 'POST': // Create a task.
-    $task = new Task($params->label, $params->completed, $params->assignee ?? null);
-    $task = $task->save();
-    if (is_array($task)) list($code, $message) = $task;
-    $data = ['task' => is_array($task) ? null : $task];
+    try {
+      $task = new Task($params->label, $params->completed, $params->assignee ?? null);
+      $task = $task->save();
+    }
+    catch (Exception $e) {
+      $code = $e->getCode();
+      $message = $e->getMessage();
+    }
+    $data = ['task' => $task ?? null];
     break;
   case 'PUT': // Update a task.
-    $task = Task::get($params->id);
-    $task = $task->update($params->label, $params->completed, $params->assignee);
-    if (is_array($task)) list($code, $message) = $task;
-    $data = ['task' => isset($code) ? null : $task];
+    try {
+      $task = Task::get($params->id);
+      $task = $task->update($params->label, $params->completed, $params->assignee);
+    }
+    catch (Exception $e) {
+      $code = $e->getCode();
+      $message = $e->getMessage();
+    }
+    $data = ['task' => $task ?? null];
     break;
   case 'DELETE': // Delete a task.
-    list($code, $message) = Task::deleteById($params->id);
+    try {
+      Task::deleteById($params->id);
+    }
+    catch (Exception $e) {
+      $code = $e->getCode();
+      $message = $e->getMessage();
+    }
     break;
   default:
     $code = 405; // Method not allowed.
@@ -91,31 +127,6 @@ function output(int $code, string $message, array $data = []): void {
   http_response_code($code);
   header('Content-Type: application/json; charset=utf-8');
 }
-
-/**
- * Get all the users from the database and outputs them in an array of objects.
- *
- * @return array of [int $code, ?string $message, array|null $data]
- */
-function getUsers(): array {
-  $mysqli = connectToDatabase();
-  $result = $mysqli->query('SELECT * FROM users');
-
-  if ($mysqli->error) {
-    $message = 'Could not retrieve the users from the database.';
-    $code = 500;
-  }
-  else {
-    $rows = [];
-    while ($object = $result->fetch_object()) {
-      $object->id = (int)$object->id;
-      array_push($rows, $object);
-    }
-  }
-
-  return [$code ?? 200, $message ?? '', $rows ?? []];
-}
-
 // --------------------------------------------------------
 
 ?>

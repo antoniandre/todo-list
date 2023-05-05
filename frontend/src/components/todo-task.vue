@@ -16,6 +16,7 @@
         {{ user.firstName }} {{ user.lastName }}
       </option>
     </select>
+    <button @click="save">Save</button>
   </p>
 </div>
 </template>
@@ -27,6 +28,7 @@ export default {
   },
 
   data: () => ({
+    loading: false,
     task: {
       id: null,
       label: '',
@@ -36,6 +38,24 @@ export default {
     users: [],
     errorMessage: ''
   }),
+
+  methods: {
+    save () {
+      fetch('/api/', {
+        method: 'put',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(this.task)
+      })
+        .then(response => response.json())
+        .then(response => {
+          this.loading = false
+          this.task = Object.assign(this.task, response.task)
+        }).catch(error => {
+          this.error = true
+          console.log(error)
+        })
+    }
+  },
 
   created () {
     fetch(`/api/${this.id}`, {
@@ -66,7 +86,10 @@ export default {
 .main-content--todo-task {
   padding: 40px;
 
-  .main-content__title {margin-bottom: 1rem;}
+  .main-content__title {
+    margin-bottom: 1rem;
+    text-transform: capitalize;
+  }
 
   .back-arrow {
     text-decoration: none;
