@@ -14,18 +14,15 @@ class Task {
   }
 
   /**
-   * Get all the tasks from the database and outputs them in an array of objects.
+   * Get all the tasks from the database and return them in an array of Tasks.
    *
-   * @return array of [int $code, ?string $message, array|null $tasks]
+   * @return array of Tasks, or an exception will be thrown.
    */
   public static function getAll(): array {
     $db = connectToDatabase();
     $result = $db->query('SELECT * FROM tasks');
 
-    if ($db->error) {
-      $message = 'Could not retrieve the tasks from the database.';
-      $code = 500;
-    }
+    if ($db->error) throw new Exception('Could not retrieve the tasks from the database.', 500);
     else {
       $rows = [];
       while ($object = $result->fetch_object()) {
@@ -34,39 +31,37 @@ class Task {
       }
     }
 
-    return [$code ?? 200, $message ?? '', $rows ?? null];
+    return $rows ?? [];
   }
 
   /**
-   * Get a task from the database given its id and output it as an object.
+   * Get a task from the database given its id and return it as an object.
    *
    * @param integer $id the id of the task to get.
-   * @return Task|array The task instance if it worked, or an error of [int $error, string $message].
+   * @return Task The task instance if it worked, or an exception will be thrown.
    */
-  public static function get(int $id): Task|array {
+  public static function get(int $id): Task {
     $db = connectToDatabase();
     $result = $db->query("SELECT * FROM `tasks` WHERE `id` = " . (int)$id);
     $task = $result->fetch_object();
 
-    if ($db->error) return [500, 'Could not read the task from the database.'];
-    elseif (!$task) return [404, 'The task was not found.'];
+    if ($db->error) throw new Exception('Could not read the task from the database.', 500);
+    elseif (!$task) throw new Exception('The task was not found.', 404);
     else return new self($task->label, (bool)$task->completed, $task->assignee, (int)$task->id);
   }
 
   /**
-   * Saves a task instance in the database, and return an array with a code and $message.
+   * Save the current task instance in the database, and return true if it worked or throw an exception.
    *
-   * @return Task|array The task instance if it worked, or an error of [int $error, string $message].
+   * @return Task The task instance if it worked, or an exception will be thrown.
    */
-  public function save(): Task|array {
+  public function save(): Task {
     $db = connectToDatabase();
     $label = $db->real_escape_string($this->label);
     $completed = (int)$this->completed;
     $db->query("INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)");
 
-    if ($db->error) {
-      return [500, 'The task could not be saved in the database.'];
-    }
+    if ($db->error) throw new Exception('The task could not be saved in the database.', 500);
     // Read from DB in case the insertion in DB results in different values of the task (e.g. cascading actions from FK).
     else return self::get($db->insert_id);
   }
@@ -74,9 +69,9 @@ class Task {
   /**
    * Delete the current task instance from the database.
    *
-   * @return array of [int $code, ?string $message]
+   * @return bool true if it worked or an exception will be thrown.
    */
-  public function delete(): array {
+  public function delete(): bool {
     return self::deleteById($this->id);
   }
 
@@ -84,13 +79,14 @@ class Task {
    * Delete a task from the database.
    *
    * @param integer $id the id of the task to delete.
-   * @return array of [int $code, ?string $message]
+   * @return bool true if it worked or an exception will be thrown.
    */
-  public static function deleteById(int $id): array {
+  public static function deleteById(int $id): bool {
     $db = connectToDatabase();
     $db->query("DELETE FROM `tasks` WHERE `id` = $id");
 
-    return [$db->error ? 500 : 204, $db->error ? 'The task could not be deleted from the database.' : ''];
+    if ($db->error) throw new Exception('The task could not be deleted from the database.', 500);
+    return true;
   }
 
   /**
@@ -99,9 +95,9 @@ class Task {
    * @param string $label the new task label.
    * @param integer $completed: 0 or 1 for a completed task.
    * @param integer $assignee: the user id.
-   * @return Task|array The task instance if it worked, or an error of [int $error, string $message].
+   * @return Task The task instance if it worked, or an exception will be thrown.
    */
-  function update(?string $label, ?bool $completed, ?int $assignee): Task|array {
+  function update(?string $label, ?bool $completed, ?int $assignee): Task {
     $db = connectToDatabase();
 
     $changes = [];
@@ -114,7 +110,7 @@ class Task {
 
     $db->query("UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $this->id");
 
-    if ($db->error) return [500, 'The task could not be saved in the database.'];
+    if ($db->error) throw new Exception('The task could not be saved in the database.', 500);
 
     // Read from DB in case the update in DB results in different values of the task (e.g. cascading actions from FK).
     else return self::get($this->id);
