@@ -1,23 +1,36 @@
 <template>
 <div class="main-content main-content--todo-task">
-  <div class="main-content__title d-flex align-center">
-    <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
-    <h1 v-html="task.id ? task.label : 'not found'"></h1>
+  <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
+  <div v-if="!task.id" class="main-content__title d-flex align-center">
+    <h1>Not Found</h1>
   </div>
   <div v-if="errorMessage" class="message message--error">{{ errorMessage }}</div>
-  <template v-else>
-    <p><strong>Label: </strong>{{ task.label }}</p>
-    <p><strong>completed: </strong>{{ task.completed }}</p>
-  </template>
-  <p>
-    <strong>Assignee: </strong>
-    <select v-model="task.assignee">
-      <option v-for="user in users" :key="user.id" :value="user.id">
-        {{ user.firstName }} {{ user.lastName }}
-      </option>
-    </select>
-    <button @click="save">Save</button>
-  </p>
+
+  <form v-else>
+    <div class="field">
+      <label for="label" class="field__label">Label</label>
+      <input v-model="task.label" id="label" type="text" class="field__input field__input--label">
+    </div>
+    <div class="field">
+      <label for="description" class="field__label field__label--description">Description</label>
+      <textarea v-model="task.description" id="description" rows="10" class="field__input"></textarea>
+    </div>
+    <div class="field">
+      <label for="completed" class="field__label">completed</label>
+      <input v-model="task.completed" id="completed" type="checkbox">
+    </div>
+    <div class="field">
+      <label for="assignee" class="field__label">Assignee</label>
+      <select v-model="task.assignee" id="assignee" class="field__input">
+        <option v-for="user in users" :key="user.id" :value="user.id">
+          {{ user.firstName }} {{ user.lastName }}
+        </option>
+      </select>
+    </div>
+    <div class="d-flex">
+      <button @click="save" class="form-validate">Save</button>
+    </div>
+  </form>
 </div>
 </template>
 
@@ -33,7 +46,9 @@ export default {
       id: null,
       label: '',
       completed: false,
-      assignee: null
+      description: '',
+      assignee: null,
+      created: ''
     },
     users: [],
     errorMessage: ''
@@ -85,6 +100,7 @@ export default {
 <style lang="scss">
 .main-content--todo-task {
   padding: 40px;
+  max-width: 580px;
 
   .main-content__title {
     margin-bottom: 1rem;
@@ -98,9 +114,60 @@ export default {
     border-radius: 99em;
     width: 1.8rem;
     aspect-ratio: 1;
-    margin-right: 1.5rem;
+    position: absolute;
+    top: 45px;
+    left: 40px;
 
     &:before {padding-top: 0.2rem;}
+  }
+
+  .field {
+    display: flex;
+    margin: 10px 0;
+    align-items: center;
+
+    &:first-child {margin-top: 0;}
+
+    &__label {
+      display: inline-block;
+      min-width: 130px;
+      margin-right: 10px;
+      text-align: right;
+      font-weight: bold;
+    }
+    &__label--description {
+      align-self: flex-start;
+      margin-top: 4px;
+    }
+
+    &__input {
+      font: 0.95rem $body-font;
+      flex-grow: 1;
+      border: none;
+      background: rgba(255, 255, 255, 0.3);
+      padding: 6px 8px;
+      width: 100%;
+      border-radius: 4px;
+      outline: none;
+    }
+    &__input--label {
+      font: bold 1.7rem $title-font;
+      padding-top: 2px;
+      padding-bottom: 0;
+      height: 42px;
+    }
+  }
+
+  .form-validate {
+    margin-left: auto;
+    margin-top: 16px;
+    border: none;
+    background: $completed-color;
+    color: #fff;
+    font-weight: bold;
+    padding: 6px 20px;
+    border-radius: 4px;
+    outline: none;
   }
 }
 </style>
