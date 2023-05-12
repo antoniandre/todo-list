@@ -3,12 +3,15 @@
 class Task {
   public $id;
   public $label;
+  public $description;
   public $completed;
   public $assignee;
+  public $created;
 
-  public function __construct(string $label, bool $completed, ?int $assignee, ?int $id = null) {
+  public function __construct(string $label, string $description, bool $completed, ?int $assignee, ?int $id = null) {
     $this->id = $id;
     $this->label = $label;
+    $this->description = $description;
     $this->completed = $completed;
     $this->assignee = $assignee;
   }
@@ -26,7 +29,7 @@ class Task {
     else {
       $rows = [];
       while ($object = $result->fetch_object()) {
-        $task = new self($object->label, (bool)$object->completed, $object->assignee, (int)$object->id);
+        $task = new self($object->label, $object->description, (bool)$object->completed, $object->assignee, (int)$object->id);
         $rows[] = $task;
       }
     }
@@ -47,7 +50,7 @@ class Task {
 
     if ($db->error) throw new Exception('Could not read the task from the database.', 500);
     elseif (!$task) throw new Exception('The task was not found.', 404);
-    else return new self($task->label, (bool)$task->completed, $task->assignee, (int)$task->id);
+    else return new self($task->label, $task->description, (bool)$task->completed, $task->assignee, (int)$task->id);
   }
 
   /**
@@ -58,8 +61,14 @@ class Task {
   public function save(): Task {
     $db = connectToDatabase();
     $label = $db->real_escape_string($this->label);
+    $description = $db->real_escape_string($this->description);
     $completed = (int)$this->completed;
-    $db->query("INSERT INTO `tasks` (`label`, `completed`) VALUES ('$label', $completed)");
+    $assignee = (int)$this->assignee;
+    $sql = <<<SQL
+      INSERT INTO `tasks` (`label`, `description`, `completed`, `assignee`)
+      VALUES ('$label', '$description', $completed, $assignee)
+    SQL;
+    $db->query($sql);
 
     if ($db->error) throw new Exception('The task could not be saved in the database.', 500);
     // Read from DB in case the insertion in DB results in different values of the task (e.g. cascading actions from FK).
@@ -93,17 +102,22 @@ class Task {
    * Update a task in the database.
    *
    * @param string $label the new task label.
+   * @param string $description the new task description.
    * @param integer $completed: 0 or 1 for a completed task.
    * @param integer $assignee: the user id.
    * @return Task The task instance if it worked, or an exception will be thrown.
    */
-  function update(?string $label, ?bool $completed, ?int $assignee): Task {
+  function update(?string $label, ?string $description, ?bool $completed, ?int $assignee): Task {
     $db = connectToDatabase();
 
     $changes = [];
     if ($label) {
       $label = $db->real_escape_string($label);
       $changes[] = "`label` = '$label'";
+    }
+    if ($description) {
+      $description = $db->real_escape_string($description);
+      $changes[] = "`description` = '$description'";
     }
     if (is_bool($completed)) $changes[] = "`completed` = " . (int)$completed;
     if (is_int($assignee)) $changes[] = "`assignee` = $assignee";

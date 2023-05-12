@@ -48,7 +48,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
   case 'POST': // Create a task.
     try {
-      $task = new Task($params->label, $params->completed, $params->assignee ?? null);
+      $task = new Task($params->label, $params->description, $params->completed, $params->assignee ?? null);
       $task = $task->save();
     }
     catch (Exception $e) {
@@ -60,7 +60,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
   case 'PUT': // Update a task.
     try {
       $task = Task::get($params->id);
-      $task = $task->update($params->label, $params->completed, $params->assignee);
+      $task = $task->update($params->label, $params->description, $params->completed, $params->assignee);
     }
     catch (Exception $e) {
       $code = $e->getCode();
