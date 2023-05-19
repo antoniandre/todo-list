@@ -1,9 +1,9 @@
 <template>
 <div class="main-content main-content--todo-task">
   <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
-  <div v-if="!task.id" class="main-content__title d-flex align-center">
-    <h1>Not Found</h1>
-  </div>
+  <h1 v-if="!task.id" class="main-content__title d-flex align-center">
+    Not Found
+  </h1>
   <div v-if="errorMessage" class="message message--error">{{ errorMessage }}</div>
 
   <form v-else>
@@ -99,12 +99,16 @@ export default {
 
 <style lang="scss">
 .main-content--todo-task {
+  position: relative;
   padding: 40px;
   max-width: 580px;
 
   .main-content__title {
     margin-bottom: 1rem;
     text-transform: capitalize;
+    margin-left: 1.8rem;
+    padding-left: 20px;
+    line-height: 1.5;
   }
 
   .back-arrow {
