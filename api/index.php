@@ -84,33 +84,11 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 output($code ?? 200, $message ?? '', $data ?? []);
-connectToDatabase()->close();
+Database::get()->close();
 // --------------------------------------------------------
 
 // Functions.
 // --------------------------------------------------------
-/**
- * Connect to the database and return the MySQLi object, or die in case of failure.
- *
- * @return \mysqli the MySQLi object.
- */
-function connectToDatabase(): \mysqli {
-  $config = (object)parse_ini_file('./config.ini');
-  $mysqli = new mysqli(
-    $config->databaseHost,
-    $config->databaseUsername,
-    $config->databasePassword,
-    $config->databaseName
-  );
-
-  if ($mysqli->connect_error) {
-    error_log($mysqli->connect_error);
-    die('Could not connect to the database.');
-  }
-
-  return $mysqli;
-}
-
 /**
  * Outputs the JSON payload to the frontend with correct response code.
  *
