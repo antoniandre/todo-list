@@ -1,7 +1,7 @@
 @font-face {
   font-family: 'title-font';
-  src: url('~@/assets/autography.woff2') format('woff2'),
-       url('~@/assets/autography.woff') format('woff');
+  src: url('@/assets/autography.woff2') format('woff2'),
+       url('@/assets/autography.woff') format('woff');
 }
 
 h1, .title {
