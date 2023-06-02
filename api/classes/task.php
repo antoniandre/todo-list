@@ -8,7 +8,7 @@ class Task {
   public $assignee;
   public $created;
 
-  public function __construct(string $label, string $description, bool $completed, ?int $assignee, ?int $id = null) {
+  public function __construct(string $label, ?string $description, bool $completed, ?int $assignee, ?int $id = null) {
     $this->id = $id;
     $this->label = $label;
     $this->description = $description;
