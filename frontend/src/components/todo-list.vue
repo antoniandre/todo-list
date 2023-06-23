@@ -7,7 +7,8 @@
       v-for="task in tasks"
       :key="task.id"
       @click="saveTask(task)"
-      :class="{ 'task': true, 'task--completed': task.completed }">
+      @contextmenu.prevent="openContextMenu(task)"
+      :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed }">
       <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
       <label class="task__label">{{ task.label }}</label>
       <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right"></router-link>
@@ -29,6 +30,14 @@
       <button @click.stop="saveNewTask(newTask)">OK</button>
     </li>
   </ul>
+  <div v-if="contextMenu.show" class="context-menu">
+    <label for="assignee" class="field__label">Assign to: </label>
+    <select v-model="contextMenu.task.assignee" id="assignee" class="field__input">
+      <option v-for="user in users" :key="user.id" :value="user.id">
+        {{ user.firstName }} {{ user.lastName }}
+      </option>
+    </select>
+  </div>
 </div>
 </template>
 
@@ -41,7 +50,12 @@ export default {
       label: '',
       completed: false
     },
-    error: false
+    users: [],
+    error: false,
+    contextMenu: {
+      show: false,
+      task: {}
+    }
   }),
 
   methods: {
@@ -89,13 +103,21 @@ export default {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
       })
-        .then(response => {
+        .then(() => {
           this.tasks = this.tasks.filter((item) => item.id !== id)
         })
         .catch(error => {
           this.error = true
           console.log(error)
         })
+    },
+
+    openContextMenu (task) {
+      const taskDomNode = document.querySelector(`.task--${task.id}`)
+      this.contextMenu.show = true
+      this.contextMenu.task = task
+      this.contextMenu.top = taskDomNode.offsetTop
+      this.contextMenu.right = taskDomNode.offsetRight
     }
   },
 
@@ -104,6 +126,7 @@ export default {
       .then(response => response.json())
       .then(response => {
         this.tasks = response.tasks
+        this.users = response.users
       })
       .catch(error => {
         this.error = true
@@ -116,7 +139,6 @@ export default {
 <style lang="scss">
 .main-content--todo-list {
   padding-top: 0;
-  overflow: hidden;
 
   .main-content__title {
     margin: 20px 0 10px;
@@ -265,6 +287,12 @@ export default {
     }
 
     &:hover button {opacity: 1;}
+  }
+
+  .context-menu {
+    position: absolute;
+    top: 100%;
+    right: 0;
   }
 }
 </style>
