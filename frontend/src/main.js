@@ -1,10 +1,17 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
+import { createRouter, createWebHistory } from 'vue-router'
 import App from './app.vue'
-import router from './router.js'
+import TodoList from './components/todo-list.vue'
+import TodoTask from './components/todo-task.vue'
 
-Vue.config.productionTip = false
+const router = createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
+  routes: [
+    { path: '/', component: TodoList },
+    { path: '/task/:id', component: TodoTask, props: true }
+  ]
+})
 
-new Vue({
-  router,
-  render: h => h(App)
-}).$mount('#app')
+const app = createApp(App)
+app.use(router)
+app.mount('#app')
