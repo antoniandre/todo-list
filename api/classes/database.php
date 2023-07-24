@@ -5,7 +5,7 @@
  */
 class Database {
   private static $instance; // Database instance.
-  private static $mysqli; // mysqli instance.
+  private $mysqli; // mysqli instance.
 
   private function __construct() {
     $this->connect();
