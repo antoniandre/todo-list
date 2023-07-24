@@ -48,7 +48,12 @@ switch ($_SERVER['REQUEST_METHOD']) {
     break;
   case 'POST': // Create a task.
     try {
-      $task = new Task($params->label, $params->description, $params->completed, $params->assignee ?? null);
+      $task = new Task(
+        $params->label ?? '',
+        $params->description ?? '',
+        $params->completed ?? false,
+        $params->assignee ?? null
+      );
       $task = $task->save();
     }
     catch (Exception $e) {

@@ -60,10 +60,10 @@ class Task {
    */
   public function save(): Task {
     $db = Database::get();
-    $label = $db->escape($this->label);
-    $description = $db->escape($this->description);
+    $label = $db->escape($this->label ?? '');
+    $description = $db->escape($this->description ?? '');
     $completed = (int)$this->completed;
-    $assignee = (int)$this->assignee;
+    $assignee = $this->assignee ?? null ? (int)$this->assignee : 'NULL';
     $sql = <<<SQL
       INSERT INTO `tasks` (`label`, `description`, `completed`, `assignee`)
       VALUES ('$label', '$description', $completed, $assignee)
