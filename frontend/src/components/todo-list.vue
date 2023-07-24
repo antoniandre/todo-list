@@ -16,7 +16,7 @@
     </li>
     <!-- New task. -->
     <li
-      ref="newTask"
+      ref="newTaskElement"
       class="task task--new"
       :class="{ checked: newTask.completed }"
       @click="newTask.completed = !newTask.completed">
@@ -41,99 +41,95 @@
 </div>
 </template>
 
-<script>
-export default {
-  data: () => ({
-    tasks: [],
-    newTask: {
-      id: null,
-      label: '',
-      completed: false
-    },
-    users: [],
-    error: false,
-    contextMenu: {
-      show: false,
-      task: {}
-    }
-  }),
+<script setup>
+import { ref, nextTick } from 'vue'
 
-  methods: {
-    saveTask (task) {
-      fetch('/api/', {
-        method: 'put',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: task.id, completed: !task.completed })
-      })
-        .then(response => response.json())
-        .then(response => {
-          task.completed = response.task.completed
-          this.loading = false
-        }).catch(error => {
-          this.error = true
-          console.log(error)
-        })
-    },
+const loading = ref(false)
+const tasks = ref([])
+const newTask = ref({
+  id: null,
+  label: '',
+  completed: false
+})
+const newTaskElement = ref(null)
+const users = ref([])
+const error = ref(false)
+const contextMenu = ref({
+  show: false,
+  task: {}
+})
 
-    saveNewTask () {
-      fetch('/api/', {
-        method: 'post',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          label: this.newTask.label,
-          completed: this.newTask.completed
-        })
-      })
-        .then(response => response.json())
-        .then(response => {
-          this.tasks.push(response.task)
-          this.newTask = Object.assign(this.newTask, { label: '', completed: false })
-          this.$nextTick(() => {
-            this.$refs.newTask.scrollIntoView({ behavior: 'smooth' })
-          })
-        }).catch(error => {
-          this.error = true
-          console.log(error)
-        })
-    },
-
-    deleteTask (id) {
-      fetch('/api/', {
-        method: 'delete',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id })
-      })
-        .then(() => {
-          this.tasks = this.tasks.filter((item) => item.id !== id)
-        })
-        .catch(error => {
-          this.error = true
-          console.log(error)
-        })
-    },
-
-    openContextMenu (task) {
-      const taskDomNode = document.querySelector(`.task--${task.id}`)
-      this.contextMenu.show = true
-      this.contextMenu.task = task
-      this.contextMenu.top = taskDomNode.offsetTop
-      this.contextMenu.right = taskDomNode.offsetRight
-    }
-  },
-
-  created () {
-    fetch('/api/', { method: 'get' })
-      .then(response => response.json())
-      .then(response => {
-        this.tasks = response.tasks
-        this.users = response.users
-      })
-      .catch(error => {
-        this.error = true
-        console.log(error)
-      })
-  }
+const saveTask = task => {
+  fetch('/api/', {
+    method: 'put',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id: task.id, completed: !task.completed })
+  })
+    .then(response => response.json())
+    .then(response => {
+      task.completed = response.task.completed
+      loading.value = false
+    }).catch(e => {
+      error.value = true
+      console.log(e)
+    })
 }
+
+const saveNewTask = () => {
+  fetch('/api/', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      label: newTask.value.label,
+      completed: newTask.value.completed
+    })
+  })
+    .then(response => response.json())
+    .then(response => {
+      tasks.value.push(response.task)
+      newTask.value = Object.assign(newTask.value, { label: '', completed: false })
+      nextTick(() => {
+        newTaskElement.value.scrollIntoView({ behavior: 'smooth' })
+      })
+    }).catch(e => {
+      error.value = true
+      console.log(e)
+    })
+}
+
+const deleteTask = id => {
+  fetch('/api/', {
+    method: 'delete',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  })
+    .then(() => {
+      tasks.value = tasks.value.filter(item => item.id !== id)
+    })
+    .catch(e => {
+      error.value = true
+      console.log(e)
+    })
+}
+
+const openContextMenu = task => {
+  const taskDomNode = document.querySelector(`.task--${task.id}`)
+  contextMenu.value.show = true
+  contextMenu.value.task = task
+  contextMenu.value.top = taskDomNode.offsetTop
+  contextMenu.value.right = taskDomNode.offsetRight
+}
+
+fetch('/api/', { method: 'get' })
+  .then(response => response.json())
+  .then(response => {
+    tasks.value = response.tasks
+    users.value = response.users
+  })
+  .catch(e => {
+    error.value = true
+    console.log(e)
+  })
 </script>
 
 <style lang="scss">

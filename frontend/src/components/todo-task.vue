@@ -30,84 +30,68 @@
         </select>
       </div>
       <div class="d-flex">
-        <button @click="save" class="form-validate">Save</button>
+        <button @click.prevent="save" class="form-validate">Save</button>
       </div>
     </form>
   </template>
 </div>
 </template>
 
-<script>
-import {  onMounted, ref } from 'vue'
-// defineProps({
-//   id: { type: [String, Number], required: true }
-// })
+<script setup>
+import { onMounted, ref } from 'vue'
 
-export default {
-  props: {
-    id: { type: [String, Number], required: true }
-  },
+const props = defineProps({
+  id: { type: [String, Number], required: true }
+})
 
-  setup () {
-    const loading = ref(true)
+const loading = ref(true)
 
-    onMounted(() => setTimeout(() => (loading.value = false), 2000))
-    return { loading }
-  },
+const task = ref({
+  id: null,
+  label: '',
+  completed: false,
+  description: '',
+  assignee: null,
+  created: ''
+})
 
-  data: () => ({
-    task: {
-      id: null,
-      label: '',
-      completed: false,
-      description: '',
-      assignee: null,
-      created: ''
-    },
-    users: [],
-    errorMessage: ''
-  }),
+const users = ref([])
+const errorMessage = ref('')
 
-  methods: {
-    save () {
-      fetch('/api/', {
-        method: 'put',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(this.task)
-      })
-        .then(response => response.json())
-        .then(response => {
-          this.loading = false
-          this.task = Object.assign(this.task, response.task)
-        }).catch(error => {
-          this.error = true
-          console.log(error)
-        })
+fetch(`/api/${props.id}`, { method: 'get' })
+  .then(response => {
+    if (!response.ok) {
+      if (response.status === 404) errorMessage.value = 'Task not found.'
+      else errorMessage.value = 'Oops. Something went wrong.'
+
+      throw new Error(errorMessage)
     }
-  },
+    return response.json()
+  })
+  .then(response => {
+    task.value = response.task
+    users.value = response.users
+  })
+  .catch(error => {
+    console.log(error)
+    errorMessage.value = 'Oops. Something went wrong.'
+  })
 
-  created () {
-    fetch(`/api/${this.id}`, {
-      method: 'get'
+onMounted(() => setTimeout(() => (loading.value = false), 2000))
+
+const save = () => {
+  fetch('/api/', {
+    method: 'put',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(task.value)
+  })
+    .then(response => response.json())
+    .then(response => {
+      loading.value = false
+      task.value = Object.assign(task.value, response.task)
+    }).catch(e => {
+      console.log(e)
     })
-      .then(response => {
-        if (!response.ok) {
-          if (response.status === 404) this.errorMessage = 'Task not found.'
-          else this.errorMessage = 'Oops. Something went wrong.'
-
-          throw new Error(this.errorMessage)
-        }
-        return response.json()
-      })
-      .then(response => {
-        this.task = response.task
-        this.users = response.users
-      })
-      .catch(error => {
-        console.log(error)
-        this.errorMessage = 'Oops. Something went wrong.'
-      })
-  }
 }
 </script>
 
