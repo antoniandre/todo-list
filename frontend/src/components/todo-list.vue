@@ -8,7 +8,7 @@
       :key="task.id"
       @click="saveTask(task)"
       @contextmenu.prevent="openContextMenu(task)"
-      :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed }">
+      :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed , 'task--focused': task.focused }">
       <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
       <label class="task__label">{{ task.label }}</label>
       <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right"></router-link>
@@ -30,7 +30,7 @@
       <button @click.stop="saveNewTask(newTask)">OK</button>
     </li>
   </ul>
-  <div v-if="contextMenu.show" class="context-menu">
+  <div v-if="contextMenu.show" ref="contextMenuElement" class="context-menu">
     <label for="assignee" class="field__label">Assign to: </label>
     <select v-model="contextMenu.task.assignee" id="assignee" class="field__input">
       <option v-for="user in users" :key="user.id" :value="user.id">
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 
 const loading = ref(false)
 const tasks = ref([])
@@ -58,6 +58,7 @@ const contextMenu = ref({
   show: false,
   task: {}
 })
+const contextMenuElement = ref(null)
 
 const saveTask = task => {
   fetch('/api/', {
@@ -116,8 +117,19 @@ const openContextMenu = task => {
   const taskDomNode = document.querySelector(`.task--${task.id}`)
   contextMenu.value.show = true
   contextMenu.value.task = task
-  contextMenu.value.top = taskDomNode.offsetTop
-  contextMenu.value.right = taskDomNode.offsetRight
+  task.focused = true
+
+  nextTick(() => {
+    contextMenuElement.value.style.top = taskDomNode.offsetTop + taskDomNode.offsetHeight + 'px'
+  })
+}
+
+const closeContextMenu = e => {
+  if (e.target.matches('.context-menu, .context-menu *')) return
+
+  contextMenu.value.show = false
+  contextMenu.value.task.focused = false
+  contextMenu.value.task = null
 }
 
 fetch('/api/', { method: 'get' })
@@ -130,6 +142,14 @@ fetch('/api/', { method: 'get' })
     error.value = true
     console.log(e)
   })
+
+onMounted(() => {
+  document.addEventListener('click', closeContextMenu)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeContextMenu)
+})
 </script>
 
 <style lang="scss">
@@ -148,6 +168,7 @@ fetch('/api/', { method: 'get' })
   }
 
   .task {
+    position: relative;
     display: flex;
     align-items: center;
     padding: 5px 30px;
@@ -155,6 +176,7 @@ fetch('/api/', { method: 'get' })
     cursor: pointer;
 
     &:hover {background-color: rgba(255, 255, 255, 0.2);}
+    &--focused {background-color: rgba(255, 255, 255, 0.2);}
   }
 
   .task__icon {
@@ -177,7 +199,6 @@ fetch('/api/', { method: 'get' })
       opacity: 0;
     }
   }
-
   .task--completed .task__icon {color: $completed-color;}
   .task:hover .task__icon:after {opacity: 0.25;}
 
@@ -219,7 +240,6 @@ fetch('/api/', { method: 'get' })
     margin-left: auto;
     font-size: 0.9rem;
     font-size: 1rem;
-    transition: 0.3s ease-in-out;
     transition: 0.3s ease-in-out;
 
     &:hover {
@@ -289,6 +309,24 @@ fetch('/api/', { method: 'get' })
     position: absolute;
     top: 100%;
     right: 0;
+    margin-top: -1px;
+    padding: 20px;
+    flex-grow: 1;
+    z-index: 20;
+
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.12);
+      box-shadow: 0 12px 12px rgba(0, 0, 0, 0.05);
+      border-radius: 0 0 8px 8px;
+      backdrop-filter: blur(25px);
+      z-index: -1;
+    }
   }
 }
 </style>
