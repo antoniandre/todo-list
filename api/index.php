@@ -7,19 +7,25 @@ spl_autoload_register(function ($className) {
 
 // MAIN.
 // --------------------------------------------------------
-runController();
+$params = json_decode(file_get_contents('php://input'));
+loadController();
 // --------------------------------------------------------
 
 // Functions.
 // --------------------------------------------------------
-function runController () {
-  $params = json_decode(file_get_contents('php://input'));
+function getPosts () {
+  global $params;
+  return $params;
+}
+
+function loadController () {
   $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
   list($endpoint, $action) = array_pad(explode('/', $endpoint), 2, '');
   $requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
   if (is_file(__DIR__ . "/controllers/$endpoint.php")) {
-    list($code, $message, $data) = include_once __DIR__ . "/controllers/$endpoint.php";
+    include_once __DIR__ . "/controllers/$endpoint.php";
+    list($code, $message, $data) = runControllerAction($requestMethod, $endpoint, $action);
   }
 
   else {
@@ -29,6 +35,11 @@ function runController () {
 
   output($code ?? 200, $message ?? '', $data ?? []);
   Database::get()->close();
+}
+
+function runControllerAction ($requestMethod, $endpoint, $action) {
+  $method = ROUTES["$requestMethod:$endpoint" . ($action ? '/{id}' : '')];
+  return is_callable($method) ? $method($action) : [404, 'Method not found.', null];
 }
 
 /**
