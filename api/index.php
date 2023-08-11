@@ -7,93 +7,30 @@ spl_autoload_register(function ($className) {
 
 // MAIN.
 // --------------------------------------------------------
-$params = json_decode(file_get_contents('php://input'));
-$endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
-
-switch ($_SERVER['REQUEST_METHOD']) {
-  case 'GET': // Get one or all tasks.
-    if (!empty($endpoint)) {
-      try {
-        $task = Task::get(is_numeric($endpoint) ? (int)$endpoint : 0);
-        $code = 200;
-      }
-      catch (Exception $e) {
-        $code = $e->getCode();
-        $message = $e->getMessage();
-      }
-      $data = ['task' => $task ?? null];
-    }
-    else {
-      try {
-        $tasks = Task::getAll();
-        $code = 200;
-      }
-      catch (Exception $e) {
-        $code = $e->getCode();
-        $message = $e->getMessage();
-      }
-      $data = ['tasks' => $tasks ?? null];
-    }
-
-    if ($code === 200) {
-      try {
-        $users = User::getAll();
-      }
-      catch (Exception $e) {
-        $code = $e->getCode();
-        $message = $e->getMessage();
-      }
-      $data['users'] = $users ?? [];
-    }
-    break;
-  case 'POST': // Create a task.
-    try {
-      $task = new Task(
-        $params->label ?? '',
-        $params->description ?? '',
-        $params->completed ?? false,
-        $params->assignee ?? null
-      );
-      $task = $task->save();
-    }
-    catch (Exception $e) {
-      $code = $e->getCode();
-      $message = $e->getMessage();
-    }
-    $data = ['task' => $task ?? null];
-    break;
-  case 'PUT': // Update a task.
-    try {
-      $task = Task::get($params->id);
-      $task = $task->update($params->label, $params->description, $params->completed, $params->assignee);
-    }
-    catch (Exception $e) {
-      $code = $e->getCode();
-      $message = $e->getMessage();
-    }
-    $data = ['task' => $task ?? null];
-    break;
-  case 'DELETE': // Delete a task.
-    try {
-      Task::deleteById($params->id);
-    }
-    catch (Exception $e) {
-      $code = $e->getCode();
-      $message = $e->getMessage();
-    }
-    break;
-  default:
-    $code = 405; // Method not allowed.
-    $message = 'Method not allowed.';
-    break;
-}
-
-output($code ?? 200, $message ?? '', $data ?? []);
-Database::get()->close();
+runController();
 // --------------------------------------------------------
 
 // Functions.
 // --------------------------------------------------------
+function runController () {
+  $params = json_decode(file_get_contents('php://input'));
+  $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
+  list($endpoint, $action) = array_pad(explode('/', $endpoint), 2, '');
+  $requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
+
+  if (is_file(__DIR__ . "/controllers/$endpoint.php")) {
+    list($code, $message, $data) = include_once __DIR__ . "/controllers/$endpoint.php";
+  }
+
+  else {
+    $code = 400; // Method not allowed.
+    $message = 'Incorrect endpoint.';
+  }
+
+  output($code ?? 200, $message ?? '', $data ?? []);
+  Database::get()->close();
+}
+
 /**
  * Outputs the JSON payload to the frontend with correct response code.
  *
