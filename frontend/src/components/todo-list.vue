@@ -11,7 +11,7 @@
       :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed , 'task--focused': task.focused }">
       <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
       <label class="task__label">{{ task.label }}</label>
-      <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right"></router-link>
+      <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
       <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
     </li>
     <!-- New task. -->
