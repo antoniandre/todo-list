@@ -58,7 +58,7 @@ const task = ref({
 const users = ref([])
 const errorMessage = ref('')
 
-fetch(`/api/${props.id}`, { method: 'get' })
+fetch(`/api/tasks/${props.id}`, { method: 'get' })
   .then(response => {
     if (!response.ok) {
       if (response.status === 404) errorMessage.value = 'Task not found.'
@@ -77,10 +77,10 @@ fetch(`/api/${props.id}`, { method: 'get' })
     errorMessage.value = 'Oops. Something went wrong.'
   })
 
-onMounted(() => setTimeout(() => (loading.value = false), 2000))
+onMounted(() => setTimeout(() => (loading.value = false), 500))
 
 const save = () => {
-  fetch('/api/', {
+  fetch('/api/tasks', {
     method: 'put',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(task.value)

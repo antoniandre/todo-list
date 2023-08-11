@@ -61,7 +61,7 @@ const contextMenu = ref({
 const contextMenuElement = ref(null)
 
 const saveTask = task => {
-  fetch('/api/', {
+  fetch('/api/tasks', {
     method: 'put',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id: task.id, completed: !task.completed })
@@ -77,7 +77,7 @@ const saveTask = task => {
 }
 
 const saveNewTask = () => {
-  fetch('/api/', {
+  fetch('/api/tasks', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -99,7 +99,7 @@ const saveNewTask = () => {
 }
 
 const deleteTask = id => {
-  fetch('/api/', {
+  fetch('/api/tasks', {
     method: 'delete',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ id })
@@ -132,7 +132,7 @@ const closeContextMenu = e => {
   contextMenu.value.task = null
 }
 
-fetch('/api/', { method: 'get' })
+fetch('/api/tasks', { method: 'get' })
   .then(response => response.json())
   .then(response => {
     tasks.value = response.tasks
