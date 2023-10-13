@@ -5,9 +5,37 @@ spl_autoload_register(function ($className) {
   include __DIR__ . '/classes/' . strtolower($className) . '.php';
 });
 
+require __DIR__ . '/vendor/autoload.php';
+
+
 // MAIN.
 // --------------------------------------------------------
 $params = json_decode(file_get_contents('php://input'));
+
+// Authentication, first step: basic auth with clear password.
+$username = $params->username ?? '';
+$password = $params->password ?? '';
+if ($username && $password) {
+  $db = Database::get();
+  $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username' AND `password` = '$password'");
+  $user = $result->fetch_object();
+  print_r([$user]);die;
+}
+
+// use Firebase\JWT\JWT;
+// use Firebase\JWT\Key;
+
+// $key = 'example_key';
+// $user = new stdClass();
+// $user->id = 3;
+// $user->firstName = 'Antoni';
+// $user->email = 'adsfgshg@sdagfhgs.sadgd';
+
+// $jwt = JWT::encode(['user' => $user], $key, 'HS256');
+// $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+// print_r([$jwt, $decoded]);die;
+
+
 loadController();
 // --------------------------------------------------------
 
