@@ -1,0 +1,12 @@
+{
+    "name": "antoni/todolist",
+    "authors": [
+        {
+            "name": "antoniandre",
+            "email": "antoniandre.web@gmail.com"
+        }
+    ],
+    "require": {
+        "firebase/php-jwt": "^6.9"
+    }
+}
