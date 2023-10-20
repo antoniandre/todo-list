@@ -1,53 +1,33 @@
 <?php
 
+// Constants & variables.
+// --------------------------------------------------------
+define('ROUTE', preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']));
+$params = json_decode(file_get_contents('php://input'));
+
+
+// MAIN.
+// --------------------------------------------------------
+require __DIR__ . '/vendor/autoload.php';
+
 // Autoload the PHP classes.
 spl_autoload_register(function ($className) {
   include __DIR__ . '/classes/' . strtolower($className) . '.php';
 });
 
-require __DIR__ . '/vendor/autoload.php';
 
-
-// MAIN.
-// --------------------------------------------------------
-$params = json_decode(file_get_contents('php://input'));
-
-// Authentication.
-$username = $params->username ?? '';
-$password = $params->password ?? '';
-
-if ($username && $password) {
-  $db = Database::get();
-  $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username'");
-  $user = $result->fetch_object();
-  if ($user && password_verify($password, $user->password)) {
+if (ROUTE === 'login') {
+  $user = User::logIn($params->username ?? '', $params->password ?? '');
+  if ($user) {
     $message = 'Access granted.';
     $code = 200;
   }
-  else {
-    $message = 'Access denied.';
-    $code = 403;
-  }
-
-  output($code, $message) && exit;
+  output($code ?? 403, $message ?? 'Access denied.') && exit;
 }
-
-// use Firebase\JWT\JWT;
-// use Firebase\JWT\Key;
-
-// $key = 'example_key';
-// $user = new stdClass();
-// $user->id = 3;
-// $user->firstName = 'Antoni';
-// $user->email = 'adsfgshg@sdagfhgs.sadgd';
-
-// $jwt = JWT::encode(['user' => $user], $key, 'HS256');
-// $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-// print_r([$jwt, $decoded]);die;
-
 
 loadController();
 // --------------------------------------------------------
+
 
 // Functions.
 // --------------------------------------------------------
@@ -57,8 +37,7 @@ function getPosts () {
 }
 
 function loadController () {
-  $endpoint = preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']);
-  list($endpoint, $action) = array_pad(explode('/', $endpoint), 2, '');
+  list($endpoint, $action) = array_pad(explode('/', ROUTE), 2, '');
   $requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
   if (is_file(__DIR__ . "/controllers/$endpoint.php")) {

@@ -2,13 +2,18 @@
 
 class User {
   public $id;
+  public $username;
+  private $password;
   public $firstName;
   public $lastName;
+  public $email;
 
-  public function __construct(string $firstName, string $lastName, ?int $id = null) {
+  public function __construct(string $username, string $firstName, string $lastName, ?string $email, ?int $id = null) {
     $this->id = $id;
+    $this->username = $username;
     $this->firstName = $firstName;
     $this->lastName = $lastName;
+    $this->email = $email;
   }
 
   /**
@@ -23,8 +28,8 @@ class User {
     if ($result === false) throw new Exception('Could not retrieve the users from the database.', 500);
     else {
       $rows = [];
-      while ($object = $result->fetch_object()) {
-        $user = new self($object->firstName, $object->lastName, (int)$object->id);
+      while ($userRow = $result->fetch_object()) {
+        $user = new self($userRow->username, $userRow->firstName, $userRow->lastName, $userRow->email, (int)$userRow->id);
         $rows[] = $user;
       }
     }
@@ -45,7 +50,7 @@ class User {
 
     if ($result === false) throw new Exception('Could not read the user from the database.', 500);
     elseif (!$user) throw new Exception('The user was not found.', 404);
-    else return new self($user->firstName, (bool)$user->lastName, (int)$user->id);
+    else return new self($user->username, $user->firstName, $user->lastName, $user->email, (int)$user->id);
   }
 
   /**
@@ -110,6 +115,44 @@ class User {
 
     // Read from DB in case the update in DB results in different values of the user (e.g. cascading actions from FK).
     else return self::get($this->id);
+  }
+
+  /**
+   * Log the user in.
+   *
+   * @param string $username
+   * @param string $password
+   * @todo Use the JWT commented code.
+   * @return User|false
+   */
+  public static function logIn(string $username, string $password): User|false {
+    if ($username && $password) {
+      $db = Database::get();
+      $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username'");
+      $user = $result->fetch_object();
+      if ($user && password_verify($password, $user->password)) {
+        return new self($user->username, $user->firstName, $user->lastName, $user->email, $user->id);
+      }
+    }
+
+    // use Firebase\JWT\JWT;
+    // use Firebase\JWT\Key;
+
+    // $key = 'example_key';
+    // $user = new stdClass();
+    // $user->id = 3;
+    // $user->firstName = 'Antoni';
+    // $user->email = 'adsfgshg@sdagfhgs.sadgd';
+
+    // $jwt = JWT::encode(['user' => $user], $key, 'HS256');
+    // $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
+    // print_r([$jwt, $decoded]);die;
+
+    return false;
+  }
+
+  public function logOut() {
+
   }
 }
 
