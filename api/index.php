@@ -12,14 +12,24 @@ require __DIR__ . '/vendor/autoload.php';
 // --------------------------------------------------------
 $params = json_decode(file_get_contents('php://input'));
 
-// Authentication, first step: basic auth with clear password.
+// Authentication.
 $username = $params->username ?? '';
 $password = $params->password ?? '';
+
 if ($username && $password) {
   $db = Database::get();
-  $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username' AND `password` = '$password'");
+  $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username'");
   $user = $result->fetch_object();
-  print_r([$user]);die;
+  if ($user && password_verify($password, $user->password)) {
+    $message = 'Access granted.';
+    $code = 200;
+  }
+  else {
+    $message = 'Access denied.';
+    $code = 403;
+  }
+
+  output($code, $message) && exit;
 }
 
 // use Firebase\JWT\JWT;
@@ -78,13 +88,15 @@ function runControllerAction ($requestMethod, $endpoint, $action) {
  * @param array $data some data to send back to the frontend if any.
  * @return void
  */
-function output(int $code, string $message, array $data = []): void {
+function output(int $code, string $message, array $data = []): true {
   $output = ['error' => $code < 200 || $code >= 300, 'message' => $message];
   $output = array_merge($output, $data);
 
   echo json_encode((object)$output);
   http_response_code($code);
   header('Content-Type: application/json; charset=utf-8');
+
+  return true; // So we can chain.
 }
 // --------------------------------------------------------
 
