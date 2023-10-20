@@ -1,21 +1,22 @@
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const username = ref('')
 const password = ref('')
 
 const onSubmit = e => {
   e.preventDefault()
 
-  fetch('/api/tasks', {
+  fetch('/api/login', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: username.value, password: password.value })
   })
     .then(response => response.json())
-    .then(response => {
-      console.log(response)
-      debugger
+    .then(({ error }) => {
+      if (!error) router.push('/')
     })
 }
 onMounted(() => {
