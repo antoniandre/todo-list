@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
 const router = useRouter()
@@ -19,8 +19,6 @@ const onSubmit = e => {
       if (!error) router.push('/')
     })
 }
-onMounted(() => {
-})
 </script>
 
 <template>

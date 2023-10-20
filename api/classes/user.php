@@ -95,19 +95,32 @@ class User {
   /**
    * Update a user in the database.
    *
+   * @param string $username the new user username.
    * @param string $firstName the new user firstName.
-   * @param integer $lastName: 0 or 1 for a lastName user.
+   * @param string $lastName the new user lastName.
+   * @param string $email the new user email.
    * @return User The user instance if it worked, or an exception will be thrown.
    */
-  function update(?string $firstName, ?bool $lastName): User {
+  function update(?string $username, ?string $firstName, ?string $lastName, ?string $email): User {
     $db = Database::get();
 
     $changes = [];
+    if ($username) {
+      $username = $db->escape($username);
+      $changes[] = "`username` = '$username'";
+    }
     if ($firstName) {
       $firstName = $db->escape($firstName);
       $changes[] = "`firstName` = '$firstName'";
     }
-    if (is_bool($lastName)) $changes[] = "`lastName` = " . (int)$lastName;
+    if ($lastName) {
+      $lastName = $db->escape($lastName);
+      $changes[] = "`lastName` = '$lastName'";
+    }
+    if ($email) {
+      $email = $db->escape($email);
+      $changes[] = "`email` = '$email'";
+    }
 
     $result = $db->query("UPDATE `users` SET " . implode(',', $changes) . " WHERE `id` = $this->id");
 
@@ -120,8 +133,8 @@ class User {
   /**
    * Log the user in.
    *
-   * @param string $username
-   * @param string $password
+   * @param string $username the username from the user to try to authenticate with.
+   * @param string $password the clear password from the user to try to authenticate with.
    * @todo Use the JWT commented code.
    * @return User|false
    */
