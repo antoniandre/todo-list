@@ -15,8 +15,11 @@ const onSubmit = e => {
     body: JSON.stringify({ username: username.value, password: password.value })
   })
     .then(response => response.json())
-    .then(({ error }) => {
-      if (!error) router.push('/')
+    .then(({ error, jwt }) => {
+      if (!error) {
+        sessionStorage.jwt = jwt
+        router.push('/')
+      }
     })
 }
 </script>
