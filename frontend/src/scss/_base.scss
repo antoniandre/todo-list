@@ -43,7 +43,7 @@ header {
   position: relative;
   max-width: 400px;
   text-align: left;
-  padding: 40px 0;
+  padding: 40px;
   flex-grow: 1;
 
   &:before {
@@ -104,4 +104,26 @@ footer {
     color: #cf1616;
     background: rgba(255, 160, 160, 0.7);
   }
+}
+
+.input-field {
+  border: none;
+  background: rgba(255, 255, 255, 0.3);
+  padding: 6px 8px;
+  width: 100%;
+  border-radius: 4px;
+  outline: none;
+  color: inherit;
+}
+
+.form-validate {
+  margin-left: auto;
+  margin-top: 16px;
+  border: none;
+  background: #009688;
+  color: #fff;
+  font-weight: bold;
+  padding: 6px 20px;
+  border-radius: 4px;
+  outline: none;
 }

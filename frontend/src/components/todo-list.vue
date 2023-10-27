@@ -26,7 +26,8 @@
         @click.stop
         @keypress.enter="saveNewTask(newTask)"
         type="text"
-        placeholder="New task...">
+        placeholder="New task..."
+        class="input-field">
       <button @click.stop="saveNewTask(newTask)">OK</button>
     </li>
   </ul>
@@ -155,6 +156,8 @@ onBeforeUnmount(() => {
 <style lang="scss">
 .main-content--todo-list {
   padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
 
   .main-content__title {
     margin: 20px 0 10px;
@@ -271,16 +274,9 @@ onBeforeUnmount(() => {
   .task--new {
     i, button {flex-shrink: 0;}
 
-    input {
-      margin: 0 8px;
-      border: none;
-      background: rgb(255 255 255 / 30%);
-      padding: 6px 8px;
-      width: 100%;
-      border-radius: 4px;
-      outline: none;
-    }
-    &.checked input {
+    .input-field {margin: 0 8px;}
+
+    &.checked .input-field {
       color: rgba(0, 150, 136, 0.5);
       text-decoration: line-through;
     }

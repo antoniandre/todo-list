@@ -22,18 +22,36 @@ const onSubmit = e => {
 </script>
 
 <template>
-<form @submit="onSubmit">
+<form @submit="onSubmit" class="main-content main-content--login">
   <h1>Log In</h1>
-  <div>
-    <input v-model="username" type="text" placeholder="username">
+  <div class="row d-flex">
+    <input v-model="username" type="text" placeholder="Username" class="input-field">
   </div>
 
-  <div>
-    <input v-model="password" type="password">
+  <div class="row d-flex">
+    <input v-model="password" type="password" class="input-field" placeholder="Password">
   </div>
 
-  <div class="d-flex justify-end">
-    <button type="submit">OK</button>
+  <div class="row d-flex justify-end">
+    <button
+      type="submit"
+      :disabled="!username || !password"
+      class="form-validate">Log In</button>
   </div>
 </form>
 </template>
+
+<style lang="scss">
+.main-content--login {
+  h1 {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+
+  .row {
+    margin-top: 1rem;
+  }
+
+  .form-validate[disabled] {opacity: 0.5;}
+}
+</style>

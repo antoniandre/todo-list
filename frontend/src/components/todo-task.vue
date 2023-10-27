@@ -98,7 +98,6 @@ const save = () => {
 <style lang="scss">
 .main-content--todo-task {
   position: relative;
-  padding: 40px;
   max-width: 580px;
 
   .main-content__title {
@@ -158,18 +157,6 @@ const save = () => {
       padding-bottom: 0;
       height: 42px;
     }
-  }
-
-  .form-validate {
-    margin-left: auto;
-    margin-top: 16px;
-    border: none;
-    background: $completed-color;
-    color: #fff;
-    font-weight: bold;
-    padding: 6px 20px;
-    border-radius: 4px;
-    outline: none;
   }
 }
 </style>
