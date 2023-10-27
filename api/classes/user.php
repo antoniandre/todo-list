@@ -1,5 +1,8 @@
 <?php
 
+use Firebase\JWT\JWT;
+use Firebase\JWT\Key;
+
 class User {
   public $id;
   public $username;
@@ -136,32 +139,24 @@ class User {
    * @param string $username the username from the user to try to authenticate with.
    * @param string $password the clear password from the user to try to authenticate with.
    * @todo Use the JWT commented code.
-   * @return User|false
+   * @return array|false
    */
-  public static function logIn(string $username, string $password): User|false {
+  public static function logIn(string $username, string $password): array|false {
     if ($username && $password) {
       $db = Database::get();
       $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username'");
       $user = $result->fetch_object();
+
       if ($user && password_verify($password, $user->password)) {
-        return new self($user->username, $user->firstName, $user->lastName, $user->email, $user->id);
+        $user = new self($user->username, $user->firstName, $user->lastName, $user->email, $user->id);
+
+        return [$user, JWT::encode(['user' => $user], 'example_key', 'HS256')];
       }
     }
 
-    // use Firebase\JWT\JWT;
-    // use Firebase\JWT\Key;
+    return [false, null];
+  }
 
-    // $key = 'example_key';
-    // $user = new stdClass();
-    // $user->id = 3;
-    // $user->firstName = 'Antoni';
-    // $user->email = 'adsfgshg@sdagfhgs.sadgd';
-
-    // $jwt = JWT::encode(['user' => $user], $key, 'HS256');
-    // $decoded = JWT::decode($jwt, new Key($key, 'HS256'));
-    // print_r([$jwt, $decoded]);die;
-
-    return false;
   }
 
   public function logOut() {

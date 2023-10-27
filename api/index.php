@@ -17,12 +17,13 @@ spl_autoload_register(function ($className) {
 
 
 if (ROUTE === 'login') {
-  $user = User::logIn($params->username ?? '', $params->password ?? '');
+  list($user, $jwt) = User::logIn($params->username ?? '', $params->password ?? '');
   if ($user) {
     $message = 'Access granted.';
     $code = 200;
+    $data = ['jwt' => $jwt];
   }
-  output($code ?? 403, $message ?? 'Access denied.') && exit;
+  output($code ?? 403, $message ?? 'Access denied.', $data ?? []) && exit;
 }
 
 loadController();
