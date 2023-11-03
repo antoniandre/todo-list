@@ -150,6 +150,10 @@ class User {
       if ($user && password_verify($password, $user->password)) {
         $user = new self($user->username, $user->firstName, $user->lastName, $user->email, $user->id);
 
+        // Store the current user ID in session to check against the JWT user ID.
+        session_start();
+        $_SESSION['user'] = $user->id;
+
         return [$user, JWT::encode(['user' => $user], 'example_key', 'HS256')];
       }
     }
@@ -170,7 +174,8 @@ class User {
       }
 
       if ($decoded && !empty($decoded->user->id) && self::get((int)$decoded->user->id)) {
-        return true;
+        if (!isset($_SESSION)) session_start();
+        if ((int)$decoded->user->id === $_SESSION['user']) return true;
       }
     }
 
@@ -178,7 +183,19 @@ class User {
   }
 
   public function logOut() {
+    if (!isset($_SESSION)) session_start();
+    session_unset();
+    session_destroy();
 
+    // Delete the session cookie.
+    if (ini_get('session.use_cookies')) {
+      $params = session_get_cookie_params();
+      setcookie(
+        session_name(), '', time() - 42000,
+        $params['path'], $params['domain'],
+        $params['secure'], $params['httponly']
+      );
+    }
   }
 }
 
