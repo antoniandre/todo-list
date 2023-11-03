@@ -157,6 +157,24 @@ class User {
     return [false, null];
   }
 
+  public static function authenticate () {
+    $headers = apache_request_headers();
+    $jwt = $headers['authorization'];
+
+    if ($jwt) {
+      try {
+        $decoded = JWT::decode($jwt, new Key('example_key', 'HS256'));
+      }
+      catch (Exception $e) {
+        output(403, "Access denied: {$e->getMessage()}.") && exit;
+      }
+
+      if ($decoded && !empty($decoded->user->id) && self::get((int)$decoded->user->id)) {
+        return true;
+      }
+    }
+
+    output(403, 'Access denied.') && exit;
   }
 
   public function logOut() {

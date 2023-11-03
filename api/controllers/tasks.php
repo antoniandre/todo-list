@@ -1,5 +1,7 @@
 <?php
 
+User::authenticate();
+
 define('ROUTES', [
   'get:tasks' => 'getAllTasks',
   'get:tasks/{id}' => 'getTask',
