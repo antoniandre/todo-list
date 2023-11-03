@@ -39,6 +39,7 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { setHeaders } from '@/helpers'
 
 const props = defineProps({
   id: { type: [String, Number], required: true }
@@ -58,7 +59,7 @@ const task = ref({
 const users = ref([])
 const errorMessage = ref('')
 
-fetch(`/api/tasks/${props.id}`, { method: 'get' })
+fetch(`/api/tasks/${props.id}`, { method: 'get', headers: setHeaders() })
   .then(response => {
     if (!response.ok) {
       if (response.status === 404) errorMessage.value = 'Task not found.'
@@ -82,7 +83,7 @@ onMounted(() => setTimeout(() => (loading.value = false), 500))
 const save = () => {
   fetch('/api/tasks', {
     method: 'put',
-    headers: { 'Content-Type': 'application/json' },
+    headers: setHeaders(),
     body: JSON.stringify(task.value)
   })
     .then(response => response.json())

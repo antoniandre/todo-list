@@ -44,6 +44,7 @@
 
 <script setup>
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { setHeaders } from '@/helpers'
 
 const loading = ref(false)
 const tasks = ref([])
@@ -64,7 +65,7 @@ const contextMenuElement = ref(null)
 const saveTask = task => {
   fetch('/api/tasks', {
     method: 'put',
-    headers: { 'Content-Type': 'application/json' },
+    headers: setHeaders(),
     body: JSON.stringify({ id: task.id, completed: !task.completed })
   })
     .then(response => response.json())
@@ -80,7 +81,7 @@ const saveTask = task => {
 const saveNewTask = () => {
   fetch('/api/tasks', {
     method: 'post',
-    headers: { 'Content-Type': 'application/json' },
+    headers: setHeaders(),
     body: JSON.stringify({
       label: newTask.value.label,
       completed: newTask.value.completed
@@ -102,7 +103,7 @@ const saveNewTask = () => {
 const deleteTask = id => {
   fetch('/api/tasks', {
     method: 'delete',
-    headers: { 'Content-Type': 'application/json' },
+    headers: setHeaders(),
     body: JSON.stringify({ id })
   })
     .then(() => {
@@ -133,7 +134,10 @@ const closeContextMenu = e => {
   contextMenu.value.task = null
 }
 
-fetch('/api/tasks', { method: 'get' })
+fetch('/api/tasks', {
+  method: 'get',
+  headers: setHeaders()
+})
   .then(response => response.json())
   .then(response => {
     tasks.value = response.tasks
