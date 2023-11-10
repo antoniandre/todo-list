@@ -1,62 +1,47 @@
 <?php
 
-// Constants & variables.
-// --------------------------------------------------------
-define('ROUTE', preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']));
-$params = json_decode(file_get_contents('php://input'));
-
-
 // MAIN.
 // --------------------------------------------------------
-require __DIR__ . '/vendor/autoload.php';
-
-// Autoload the PHP classes.
-spl_autoload_register(function ($className) {
-  include __DIR__ . '/classes/' . strtolower($className) . '.php';
-});
-
-
-if (ROUTE === 'login') {
-  list($user, $jwt) = User::logIn($params->username ?? '', $params->password ?? '');
-  if ($user) {
-    $message = 'Access granted.';
-    $code = 200;
-    $data = ['jwt' => $jwt];
-  }
-  output($code ?? 403, $message ?? 'Access denied.', $data ?? []) && exit;
-}
-
+defineConstants();
+autoload();
 loadController();
 // --------------------------------------------------------
 
 
 // Functions.
 // --------------------------------------------------------
-function getPosts () {
-  global $params;
-  return $params;
+function defineConstants () {
+  // The full route (after /api/) requested by the frontend.
+  define('ROUTE', preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']));
+  // The request method (E.g. get, post, put, delete).
+  define('METHOD', strtolower($_SERVER['REQUEST_METHOD']));
+  // Any user input provided by the frontend.
+  define('INPUT', json_decode(file_get_contents('php://input')));
+};
+
+function autoload () {
+  require __DIR__ . '/vendor/autoload.php';
+
+  // Autoload the PHP classes.
+  spl_autoload_register(function ($className) {
+    include __DIR__ . '/classes/' . strtolower($className) . '.php';
+  });
 }
 
 function loadController () {
   list($endpoint, $action) = array_pad(explode('/', ROUTE), 2, '');
-  $requestMethod = strtolower($_SERVER['REQUEST_METHOD']);
 
   if (is_file(__DIR__ . "/controllers/$endpoint.php")) {
     include_once __DIR__ . "/controllers/$endpoint.php";
-    list($code, $message, $data) = runControllerAction($requestMethod, $endpoint, $action);
+    list($code, $message, $data) = runControllerAction($endpoint, $action);
+    output($code ?? 200, $message ?? '', $data ?? []) && exit;
   }
 
-  else {
-    $code = 400; // Method not allowed.
-    $message = 'Incorrect endpoint.';
-  }
-
-  output($code ?? 200, $message ?? '', $data ?? []);
-  Database::get()->close();
+  else output(404, 'Endpoint not found.') && exit;
 }
 
-function runControllerAction ($requestMethod, $endpoint, $action) {
-  $method = ROUTES["$requestMethod:$endpoint" . ($action ? '/{id}' : '')];
+function runControllerAction ($endpoint, $action) {
+  $method = ROUTES[METHOD . ":$endpoint" . ($action ? "/$action" : '')];
   return is_callable($method) ? $method($action) : [404, 'Method not found.', null];
 }
 

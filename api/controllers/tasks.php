@@ -62,14 +62,12 @@ function getTask ($id) {
 }
 
 function createTask () {
-  $params = getPosts();
-
   try {
     $task = new Task(
-      $params->label ?? '',
-      $params->description ?? '',
-      $params->completed ?? false,
-      $params->assignee ?? null
+      INPUT->label ?? '',
+      INPUT->description ?? '',
+      INPUT->completed ?? false,
+      INPUT->assignee ?? null
     );
     $task = $task->save();
   }
@@ -83,10 +81,8 @@ function createTask () {
 }
 
 function deleteTask () {
-  $params = getPosts();
-
   try {
-    Task::deleteById($params->id);
+    Task::deleteById(INPUT->id);
   }
   catch (Exception $e) {
     $code = $e->getCode();
@@ -97,11 +93,9 @@ function deleteTask () {
 }
 
 function updateTask () {
-  $params = getPosts();
-
   try {
-    $task = Task::get($params->id);
-    $task = $task->update($params->label, $params->description, $params->completed, $params->assignee);
+    $task = Task::get(INPUT->id);
+    $task = $task->update(INPUT->label, INPUT->description, INPUT->completed, INPUT->assignee);
   }
   catch (Exception $e) {
     $code = $e->getCode();

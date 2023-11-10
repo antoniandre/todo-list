@@ -1,15 +1,26 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { setHeaders } from '@/helpers'
 
 const router = useRouter()
 const username = ref('')
 const password = ref('')
 
+// If we are already authenticated, redirect to / and skip the login page.
+// Each page will authenticate the user from JWT and reject access if invalid.
+if (sessionStorage.jwt) {
+  fetch('/api/user/authenticate', { method: 'get', headers: setHeaders() })
+    .then(response => response.json())
+    .then(({ error }) => {
+      if (!error) router.push('/')
+    })
+}
+
 const onSubmit = e => {
   e.preventDefault()
 
-  fetch('/api/login', {
+  fetch('/api/user/login', {
     method: 'post',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ username: username.value, password: password.value })

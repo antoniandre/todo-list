@@ -39,7 +39,10 @@
 
 <script setup>
 import { onMounted, ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
+
+const router = useRouter()
 
 const props = defineProps({
   id: { type: [String, Number], required: true }
@@ -62,7 +65,8 @@ const errorMessage = ref('')
 fetch(`/api/tasks/${props.id}`, { method: 'get', headers: setHeaders() })
   .then(response => {
     if (!response.ok) {
-      if (response.status === 404) errorMessage.value = 'Task not found.'
+      if (response.status === 403) router.push('/login')
+      else if (response.status === 404) errorMessage.value = 'Task not found.'
       else errorMessage.value = 'Oops. Something went wrong.'
 
       throw new Error(errorMessage)
@@ -73,8 +77,7 @@ fetch(`/api/tasks/${props.id}`, { method: 'get', headers: setHeaders() })
     task.value = response.task
     users.value = response.users
   })
-  .catch(error => {
-    console.log(error)
+  .catch(() => {
     errorMessage.value = 'Oops. Something went wrong.'
   })
 

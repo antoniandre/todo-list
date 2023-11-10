@@ -44,8 +44,10 @@
 
 <script setup>
 import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
 
+const router = useRouter()
 const loading = ref(false)
 const tasks = ref([])
 const newTask = ref({
@@ -138,14 +140,19 @@ fetch('/api/tasks', {
   method: 'get',
   headers: setHeaders()
 })
-  .then(response => response.json())
+  .then(response => {
+    if (!response.ok) {
+      error.value = true
+      if (response.status === 403) router.push('/login')
+    }
+    else return response.json()
+  })
   .then(response => {
     tasks.value = response.tasks
     users.value = response.users
   })
-  .catch(e => {
+  .catch(() => {
     error.value = true
-    console.log(e)
   })
 
 onMounted(() => {

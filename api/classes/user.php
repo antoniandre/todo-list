@@ -161,7 +161,7 @@ class User {
     return [false, null];
   }
 
-  public static function authenticate () {
+  public static function authenticate(): true {
     $headers = apache_request_headers();
     $jwt = $headers['authorization'];
 
@@ -182,7 +182,7 @@ class User {
     output(403, 'Access denied.') && exit;
   }
 
-  public function logOut() {
+  public function logOut(): void {
     if (!isset($_SESSION)) session_start();
     session_unset();
     session_destroy();
