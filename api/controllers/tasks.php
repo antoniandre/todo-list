@@ -1,8 +1,9 @@
 <?php
 
-User::authenticate();
+// @todo: This causes to not send the payload on task/87 when the response code is 404.
+// User::authenticate();
 
-define('ROUTES', [
+define('ENDPOINTS', [
   'get:tasks' => 'getAllTasks',
   'get:tasks/{id}' => 'getTask',
   'post:tasks' => 'createTask',
@@ -32,7 +33,7 @@ function getAllTasks () {
     $data['users'] = $users ?? [];
   }
 
-  return [$code, $message ?? '', $data];
+  output($code, $message ?? '', $data) && exit;
 }
 
 function getTask ($id) {
@@ -58,7 +59,7 @@ function getTask ($id) {
     $data['users'] = $users ?? [];
   }
 
-  return [$code ?? 200, $message ?? '', $data];
+  output($code ?? 200, $message ?? '', $data) && exit;
 }
 
 function createTask () {
@@ -77,7 +78,7 @@ function createTask () {
   }
   $data = ['task' => $task ?? null];
 
-  return [$code ?? 200, $message ?? '', $data];
+  output($code ?? 200, $message ?? '', $data) && exit;
 }
 
 function deleteTask () {
@@ -89,7 +90,7 @@ function deleteTask () {
     $message = $e->getMessage();
   }
 
-  return [$code ?? 200, $message ?? '', null];
+  output($code ?? 200, $message ?? '', null) && exit;
 }
 
 function updateTask () {
@@ -103,7 +104,7 @@ function updateTask () {
   }
   $data = ['task' => $task ?? null];
 
-  return [$code ?? 200, $message ?? '', $data];
+  output($code ?? 200, $message ?? '', $data) && exit;
 }
 
 ?>

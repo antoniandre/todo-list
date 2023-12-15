@@ -1,6 +1,6 @@
 <?php
 
-define('ROUTES', [
+define('ENDPOINTS', [
   'get:user/authenticate' => 'authenticate',
   'post:user/login' => 'logIn',
   'get:user/logout' => 'logOut'

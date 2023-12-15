@@ -29,33 +29,33 @@ function autoload () {
 }
 
 function loadController () {
-  list($endpoint, $action) = array_pad(explode('/', ROUTE), 2, '');
+  list($controller, $action) = array_pad(explode('/', ROUTE), 2, '');
 
-  if (is_file(__DIR__ . "/controllers/$endpoint.php")) {
-    include_once __DIR__ . "/controllers/$endpoint.php";
-    list($code, $message, $data) = runControllerAction($endpoint, $action);
-    output($code ?? 200, $message ?? '', $data ?? []) && exit;
+  if (is_file(__DIR__ . "/controllers/$controller.php")) {
+    include_once __DIR__ . "/controllers/$controller.php";
+    runControllerAction($controller, $action);
   }
 
   else output(404, 'Endpoint not found.') && exit;
 }
 
 function runControllerAction ($endpoint, $action) {
-  $method = ROUTES[METHOD . ":$endpoint" . ($action ? "/$action" : '')];
-  return is_callable($method) ? $method($action) : [404, 'Method not found.', null];
+  $method = ENDPOINTS[METHOD . ":$endpoint" . ($action ? "/$action" : '')] ?? '';
+  if (is_callable($method)) $method($action);
+  else output(404, 'Method not found.') && exit;
 }
 
 /**
  * Outputs the JSON payload to the frontend with correct response code.
  *
- * @param integer $code the response code to send back to the frontend.
- * @param string $message a potential message in case of error.
- * @param array $data some data to send back to the frontend if any.
+ * @param ?integer $code the response code to send back to the frontend.
+ * @param ?string $message a potential message in case of error.
+ * @param ?array $data some data to send back to the frontend if any.
  * @return void
  */
-function output(int $code, string $message, array $data = []): true {
+function output(?int $code = 200, ?string $message = '', ?array $data = []): true {
   $output = ['error' => $code < 200 || $code >= 300, 'message' => $message];
-  $output = array_merge($output, $data);
+  $output = array_merge($output, $data ?: []);
 
   echo json_encode((object)$output);
   http_response_code($code);
