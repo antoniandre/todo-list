@@ -5,21 +5,22 @@
 defineConstants();
 autoload();
 loadController();
+runControllerMethod();
 // --------------------------------------------------------
 
 
 // Functions.
 // --------------------------------------------------------
-function defineConstants () {
+function defineConstants() {
   // The full route (after /api/) requested by the frontend.
-  define('ROUTE', preg_replace('/^.*\/api\//', '', $_SERVER['REQUEST_URI']));
+  define('ROUTE', preg_replace('/^.*\/api\//', '', rtrim($_SERVER['REQUEST_URI'], '/')));
   // The request method (E.g. get, post, put, delete).
   define('METHOD', strtolower($_SERVER['REQUEST_METHOD']));
   // Any user input provided by the frontend.
   define('INPUT', json_decode(file_get_contents('php://input')));
 };
 
-function autoload () {
+function autoload() {
   require __DIR__ . '/vendor/autoload.php';
 
   // Autoload the PHP classes.
@@ -28,20 +29,44 @@ function autoload () {
   });
 }
 
-function loadController () {
+function loadController() {
   list($controller, $action) = array_pad(explode('/', ROUTE), 2, '');
 
   if (is_file(__DIR__ . "/controllers/$controller.php")) {
     include_once __DIR__ . "/controllers/$controller.php";
-    runControllerAction($controller, $action);
   }
 
   else output(404, 'Endpoint not found.') && exit;
 }
 
-function runControllerAction ($endpoint, $action) {
-  $method = ENDPOINTS[METHOD . ":$endpoint" . ($action ? "/$action" : '')] ?? '';
-  if (is_callable($method)) $method($action);
+function runControllerMethod() {
+  $found = false;
+  $params = [];
+
+  foreach(ENDPOINTS as $endpoint => $method) {
+    list($endpointMethod, $endpoint) = explode(':', $endpoint);
+
+    // 1. Skip if the method is different.
+    if (METHOD !== $endpointMethod) continue;
+
+    // 2. If the route is exactly like the endpoint, we found it.
+    if ($endpoint === ROUTE) {
+      $found = true;
+      break;
+    }
+
+    // 3. If there are variables in the endpoint, try to match on the route.
+    if (strstr($endpoint, '{')) {
+      $endpointPattern = preg_replace('~\{[\w-]+?\}~', '([\w-]+?)', $endpoint);
+      if (preg_match("~^$endpointPattern$~", ROUTE, $matches)) {
+        $found = true;
+        $params = array_slice($matches, 1);
+        break;
+      }
+    }
+  }
+
+  if ($found && is_callable($method)) $method(...$params);
   else output(404, 'Method not found.') && exit;
 }
 
