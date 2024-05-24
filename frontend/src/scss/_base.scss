@@ -81,9 +81,11 @@ footer {
 
     span {
       opacity: 0.8;
-      font: bold 19px/1.4 $title-font;
+      font: bold 15px/1 $title-font;
       margin-left: 8px;
       margin-right: 8px;
+      top: -2px;
+      position: relative;
     }
   }
 }

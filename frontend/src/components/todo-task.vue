@@ -38,7 +38,7 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
 
@@ -81,9 +81,9 @@ fetch(`/api/tasks/${props.id}`, { method: 'get', headers: setHeaders() })
     errorMessage.value = 'Oops. Something went wrong.'
   })
 
-onMounted(() => setTimeout(() => (loading.value = false), 500))
-
 const save = () => {
+  loading.value = true
+
   fetch('/api/tasks', {
     method: 'put',
     headers: setHeaders(),
@@ -91,10 +91,11 @@ const save = () => {
   })
     .then(response => response.json())
     .then(response => {
-      loading.value = false
       task.value = Object.assign(task.value, response.task)
     }).catch(e => {
       console.log(e)
+    }).finally(() => {
+      loading.value = false
     })
 }
 </script>
