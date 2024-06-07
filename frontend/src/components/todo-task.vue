@@ -1,39 +1,36 @@
 <template>
 <div class="main-content main-content--todo-task">
-  <div v-if="loading">LOADING</div>
-  <template v-else>
-    <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
-    <h1 v-if="!task.id" class="main-content__title d-flex align-center">
-      Not Found
-    </h1>
-    <div v-if="errorMessage" class="message message--error">{{ errorMessage }}</div>
+  <router-link to="/" class="back-arrow i-arrow-left" title="Back to list"></router-link>
+  <h1 v-if="!task.id" class="main-content__title d-flex align-center">
+    Not Found
+  </h1>
+  <div v-if="errorMessage" class="message message--error">{{ errorMessage }}</div>
 
-    <form v-else>
-      <div class="field">
-        <label for="label" class="field__label">Label</label>
-        <input v-model="task.label" id="label" type="text" class="field__input field__input--label">
-      </div>
-      <div class="field">
-        <label for="description" class="field__label field__label--description">Description</label>
-        <textarea v-model="task.description" id="description" rows="10" class="field__input"></textarea>
-      </div>
-      <div class="field">
-        <label for="completed" class="field__label">completed</label>
-        <input v-model="task.completed" id="completed" type="checkbox">
-      </div>
-      <div class="field">
-        <label for="assignee" class="field__label">Assignee</label>
-        <select v-model="task.assignee" id="assignee" class="field__input">
-          <option v-for="user in users" :key="user.id" :value="user.id">
-            {{ user.firstName }} {{ user.lastName }}
-          </option>
-        </select>
-      </div>
-      <div class="d-flex">
-        <button @click.prevent="save" class="form-validate">Save</button>
-      </div>
-    </form>
-  </template>
+  <form v-else>
+    <div class="field">
+      <label for="label" class="field__label">Label</label>
+      <input v-model="task.label" id="label" type="text" class="field__input field__input--label">
+    </div>
+    <div class="field">
+      <label for="description" class="field__label field__label--description">Description</label>
+      <textarea v-model="task.description" id="description" rows="10" class="field__input"></textarea>
+    </div>
+    <div class="field">
+      <label for="completed" class="field__label">completed</label>
+      <input v-model="task.completed" id="completed" type="checkbox">
+    </div>
+    <div class="field">
+      <label for="assignee" class="field__label">Assignee</label>
+      <select v-model="task.assignee" id="assignee" class="field__input">
+        <option v-for="user in users" :key="user.id" :value="user.id">
+          {{ user.firstName }} {{ user.lastName }}
+        </option>
+      </select>
+    </div>
+    <div class="d-flex">
+      <w-button @click.prevent="save" class="form-validate" :loading="loading">Save</w-button>
+    </div>
+  </form>
 </div>
 </template>
 
@@ -48,7 +45,7 @@ const props = defineProps({
   id: { type: [String, Number], required: true }
 })
 
-const loading = ref(true)
+const loading = ref(false)
 
 const task = ref({
   id: null,
