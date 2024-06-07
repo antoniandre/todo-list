@@ -9,7 +9,8 @@
   "dependencies": {
     "@vitejs/plugin-vue": "^4.2.3",
     "vue": "~3.3.4",
-    "vue-router": "^4.2.2"
+    "vue-router": "^4.2.2",
+    "wave-ui": "^3.13.5"
   },
   "devDependencies": {
     "eslint": "^8.26.0",

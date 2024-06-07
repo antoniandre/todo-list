@@ -213,7 +213,7 @@ onBeforeUnmount(() => {
       opacity: 0;
     }
   }
-  .task--completed .task__icon {color: $completed-color;}
+  .task--completed .task__icon {color: $primary-color;}
   .task:hover .task__icon:after {opacity: 0.25;}
 
   .task__label {
@@ -228,13 +228,13 @@ onBeforeUnmount(() => {
       left: 0;
       width: 0;
       transform: translateY(-50%);
-      border-top: 1px solid $completed-color;
+      border-top: 1px solid $primary-color;
       transition: 0.2s ease-in-out;
     }
   }
 
   .task--completed .task__label {
-    color: $completed-color;
+    color: $primary-color;
 
     &:before {width: 100%;}
   }
@@ -296,7 +296,7 @@ onBeforeUnmount(() => {
       margin-left: auto;
       border-radius: 99em;
       border: none;
-      background-color: rgba($completed-color, 0.5);
+      background-color: rgba($primary-color, 0.5);
       width: 1.5rem;
       aspect-ratio: 1;
       color: #fff;
@@ -306,7 +306,7 @@ onBeforeUnmount(() => {
       font-size: 12px;
       transition: 0.3s;
 
-      &:hover {background-color: rgba($completed-color, 0.8);}
+      &:hover {background-color: rgba($primary-color, 0.8);}
     }
 
     &:hover button {opacity: 1;}

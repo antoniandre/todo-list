@@ -45,6 +45,7 @@ header {
   text-align: left;
   padding: 40px;
   flex-grow: 1;
+  z-index: 0;
 
   &:before {
     content: "";
@@ -122,7 +123,7 @@ footer {
   margin-left: auto;
   margin-top: 16px;
   border: none;
-  background: #009688;
+  background: $primary-color;
   color: #fff;
   font-weight: bold;
   padding: 6px 20px;
