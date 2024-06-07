@@ -1,20 +1,18 @@
 <template>
-  <div id="app">
-    <header>
-      <i class="app-logo i-done-all"></i>
-      <span class="app-name">To Do App</span>
-    </header>
+  <header>
+    <i class="app-logo i-done-all"></i>
+    <span class="app-name">To Do App</span>
+  </header>
 
-    <main>
-      <router-view></router-view>
-    </main>
+  <main>
+    <router-view></router-view>
+  </main>
 
-    <footer>
-      <div class="copyright">
-        &copy; <span>To Do App</span> {{ (new Date()).getFullYear() }}
-      </div>
-    </footer>
-  </div>
+  <footer>
+    <div class="copyright">
+      &copy; <span>To Do App</span> {{ (new Date()).getFullYear() }}
+    </div>
+  </footer>
 </template>
 
 <script>
