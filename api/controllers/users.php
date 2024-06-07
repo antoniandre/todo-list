@@ -1,10 +1,24 @@
 <?php
 
 define('ENDPOINTS', [
+  'get:users' => 'getAllUsers',
   'get:user/authenticate' => 'authenticate',
   'post:user/login' => 'logIn',
   'get:user/logout' => 'logOut'
 ]);
+
+function getAllUsers () {
+  try {
+    $users = User::getAll();
+    $code = 200;
+  }
+  catch (Exception $e) {
+    $code = $e->getCode();
+    $message = $e->getMessage();
+  }
+
+  output($code, $message ?? '', ['users' => $users ?? []]) && exit;
+}
 
 function authenticate () {
   if (User::authenticate()) output(200, 'Access granted.') && exit;

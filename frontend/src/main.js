@@ -5,6 +5,7 @@ import App from './app.vue'
 import Login from './views/login.vue'
 import TodoList from './views/todo-list.vue'
 import TodoTask from './views/todo-task.vue'
+import Users from './views/users.vue'
 import 'wave-ui/dist/wave-ui.css'
 
 const router = createRouter({
@@ -12,6 +13,7 @@ const router = createRouter({
   routes: [
     { path: '/login', component: Login },
     { path: '/', component: TodoList },
+    { path: '/users', component: Users, props: true },
     { path: '/task/:id', component: TodoTask, props: true }
   ]
 })
