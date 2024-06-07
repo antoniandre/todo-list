@@ -32,11 +32,13 @@ function autoload() {
 function loadController() {
   list($controller, $action) = array_pad(explode('/', ROUTE), 2, '');
 
-  if (is_file(__DIR__ . "/controllers/$controller.php")) {
-    include_once __DIR__ . "/controllers/$controller.php";
-  }
-
-  else output(404, 'Endpoint not found.') && exit;
+  // Load controller in plural form regardless of how it's written in controller.
+  // For instance /api/user/login will still load the `users` controller.
+  $controllerScript = rtrim($controller, 's');
+  $controllersDir = __DIR__ . '/controllers';
+  if (!is_file("$controllersDir/$controllerScript.php")) $controllerScript = "{$controllerScript}s";
+  if (!is_file("$controllersDir/$controllerScript.php")) output(404, 'Controller not found.') && exit;
+  else include_once "$controllersDir/$controllerScript.php";
 }
 
 function runControllerMethod() {
