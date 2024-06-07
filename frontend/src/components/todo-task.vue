@@ -17,7 +17,7 @@
     </div>
     <div class="field">
       <label for="completed" class="field__label">completed</label>
-      <input v-model="task.completed" id="completed" type="checkbox">
+      <w-checkbox v-model="task.completed" id="completed"></w-checkbox>
     </div>
     <div class="field">
       <label for="assignee" class="field__label">Assignee</label>
