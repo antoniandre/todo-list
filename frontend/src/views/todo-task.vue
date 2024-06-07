@@ -66,7 +66,7 @@ fetch(`/api/tasks/${props.id}`, { method: 'get', headers: setHeaders() })
       else if (response.status === 404) errorMessage.value = 'Task not found.'
       else errorMessage.value = 'Oops. Something went wrong.'
 
-      throw new Error(errorMessage)
+      throw new Error(errorMessage.value)
     }
     return response.json()
   })

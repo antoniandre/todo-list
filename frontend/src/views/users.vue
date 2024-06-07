@@ -27,7 +27,7 @@ fetch('/api/users', {
 </script>
 
 <template>
-<div class="main-content main-content--login">
+<div class="main-content main-content--users">
   <h1>Users</h1>
 
   <ul>
@@ -39,7 +39,7 @@ fetch('/api/users', {
 </template>
 
 <style lang="scss">
-.main-content--login {
+.main-content--users {
   h1 {
     text-align: center;
     margin-bottom: 1rem;
