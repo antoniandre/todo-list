@@ -2,9 +2,9 @@ import { createApp } from 'vue'
 import { createRouter, createWebHistory } from 'vue-router'
 import WaveUI from 'wave-ui'
 import App from './app.vue'
-import Login from './components/login.vue'
-import TodoList from './components/todo-list.vue'
-import TodoTask from './components/todo-task.vue'
+import Login from './views/login.vue'
+import TodoList from './views/todo-list.vue'
+import TodoTask from './views/todo-task.vue'
 import 'wave-ui/dist/wave-ui.css'
 
 const router = createRouter({
