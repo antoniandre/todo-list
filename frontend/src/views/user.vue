@@ -5,7 +5,7 @@ import { setHeaders } from '@/helpers'
 
 const router = useRouter()
 const props = defineProps({
-  id: { type: Number, required: true }
+  id: { type: String, required: true }
 })
 
 const errorMessage = ref('')
@@ -19,25 +19,34 @@ let user = reactive({
   phone: ref('')
 })
 
-fetch(`/api/users/${props.id}`, {
-  method: 'get',
-  headers: setHeaders()
-})
-  .then(response => {
-    if (!response.ok) {
-      if (response.status === 403) router.push('/login')
-      else if (response.status === 404) errorMessage.value = 'Task not found.'
-      else errorMessage.value = 'Oops. Something went wrong.'
-    }
-    else return response.json()
+if (props.id === 'new') {
+  user.id = 'new'
+  const [firstName, ...lastName] = localStorage.userFirstName.split(' ')
+  if (localStorage.userFirstName) {
+    user.firstName = firstName
+    user.lastName = lastName.join(' ')
+  }
+}
+else {
+  fetch(`/api/users/${props.id}`, {
+    method: 'get',
+    headers: setHeaders()
   })
-  .then(response => {
-    user = Object.assign(user, response.user)
-  })
-  .catch(() => {
-    errorMessage.value = 'Oops. Something went wrong.'
-  })
-
+    .then(response => {
+      if (!response.ok) {
+        if (response.status === 403) router.push('/login')
+        else if (response.status === 404) errorMessage.value = 'Task not found.'
+        else errorMessage.value = 'Oops. Something went wrong.'
+      }
+      else return response.json()
+    })
+    .then(response => {
+      user = Object.assign(user, response.user)
+    })
+    .catch(() => {
+      errorMessage.value = 'Oops. Something went wrong.'
+    })
+}
 </script>
 
 <template>
@@ -50,7 +59,8 @@ fetch(`/api/users/${props.id}`, {
 
   <form v-else>
     <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-
+    <input v-model="user.firstName">
+    <input v-model="user.lastName">
     <p>{{ user.email }}</p>
     <p>{{ user.phone }}</p>
   </form>
