@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
 
@@ -22,41 +22,95 @@ fetch('/api/users', {
   })
   .catch(() => {
   })
+  .finally(() => {
+    scrollHeight.value = usersListEl.value.scrollHeight
+    offsetHeight.value = usersListEl.value.offsetHeight
+  })
 
 const openNewUser = () => {
   localStorage.userFirstName = newUserFirstName.value
   router.push('/users/new')
 }
+
+const usersListEl = ref(null)
+const offsetHeight = ref(0)
+const scrollHeight = ref(0)
+const currentScrollPercent = ref(0)
+const isScrolling = ref(false)
+let timeoutId = null
+
+const scrollbarThumbStyles = computed(() => {
+  if (!usersListEl.value) return {}
+
+  let height = offsetHeight.value * 100 / scrollHeight.value
+  if (isNaN(height)) height = 0
+
+  return {
+    top: `${currentScrollPercent.value}%`,
+    height: `${height}%`
+  }
+})
+
+const onMousewheel = e => {
+  clearTimeout(timeoutId)
+  isScrolling.value = true
+  usersListEl.value.scrollTop += e.deltaY
+  currentScrollPercent.value = usersListEl.value.scrollTop * 100 / scrollHeight.value
+  timeoutId = setTimeout(() => (isScrolling.value = false), 200)
+}
+
+const onResize = e => {
+  offsetHeight.value = usersListEl.value.offsetHeight
+  scrollHeight.value = usersListEl.value.scrollHeight
+}
+
+onMounted(() => {
+  offsetHeight.value = usersListEl.value.offsetHeight
+  scrollHeight.value = usersListEl.value.scrollHeight
+
+  window.addEventListener('resize', onResize)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', onResize)
+})
 </script>
 
 <template>
 <div class="main-content main-content--users">
   <h1>Users</h1>
+  <div class="scrollable">
+    <div class="scrollbar" :class="{ scrolling: isScrolling }">
+      <div class="scrollbar__track"></div>
+      <div class="scrollbar__thumb" :style="scrollbarThumbStyles"></div>
+    </div>
+    <div class="scrollable__content">
+      <ul class="users scrollable" ref="usersListEl" @mousewheel="onMousewheel">
+        <li v-for="user in users" :key="user.id" class="user">
+          <router-link :to="`/users/${user.id}`">
+            <div class="user__avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
+            {{ user.firstName }} {{ user.lastName }}
+            <i class="user__open-link arrow i-arrow-right"></i>
+          </router-link>
+          <button class="user__delete i-cross" @click.stop="deleteUser(user.id)"></button>
+        </li>
 
-  <ul class="users">
-    <li v-for="user in users" :key="user.id" class="user">
-      <router-link :to="`/users/${user.id}`">
-        <div class="user__avatar">{{ user.firstName[0] }}{{ user.lastName[0] }}</div>
-        {{ user.firstName }} {{ user.lastName }}
-        <i class="user__open-link arrow i-arrow-right"></i>
-      </router-link>
-      <button class="user__delete i-cross" @click.stop="deleteUser(user.id)"></button>
-    </li>
-
-    <!-- New user. -->
-    <li
-      ref="newUserElement"
-      class="user user--new">
-      <div class="user__avatar user__avatar--add">+</div>
-      <input
-        v-model="newUserFirstName"
-        @click.stop
-        @keypress.enter="openNewUser"
-        placeholder="New user..."
-        class="input-field">
-      <button @click.stop="openNewUser">OK</button>
-    </li>
-  </ul>
+        <!-- New user. -->
+        <li
+          ref="newUserElement"
+          class="user user--new">
+          <div class="user__avatar user__avatar--add">+</div>
+          <input
+            v-model="newUserFirstName"
+            @click.stop
+            @keypress.enter="openNewUser"
+            placeholder="New user..."
+            class="input-field">
+          <button @click.stop="openNewUser">OK</button>
+        </li>
+      </ul>
+    </div>
+  </div>
 </div>
 </template>
 
@@ -77,7 +131,7 @@ const openNewUser = () => {
 
   .users {
     list-style-type: none;
-    overflow: auto;
+    overflow: hidden;
     max-height: 40vh;
   }
 
@@ -201,6 +255,38 @@ const openNewUser = () => {
     }
 
     &:hover button {opacity: 1;}
+  }
+}
+
+.scrollable {
+  position: relative;
+
+  .scrollbar {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: 8px;
+    background-color: rgba(#000, 0.15);
+    border-radius: 99em;
+    z-index: 100;
+    opacity: 0;
+    transition: 0.25s 0.2s;
+
+    &.scrolling {
+      opacity: 1;
+      transition: 0.2s;
+    }
+
+    &__track {
+      position: absolute;
+      inset: 0;
+    }
+    &__thumb {
+      position: absolute;
+      inset: 1px;
+      height: 40px;
+      border-radius: 99em;
+      background-color: rgba(#000, 0.4);
+    }
   }
 }
 </style>
