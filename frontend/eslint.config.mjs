@@ -1,15 +1,14 @@
-import globals from "globals";
-import pluginJs from "@eslint/js";
-import pluginVue from "eslint-plugin-vue";
-import standard from "eslint-config-standard";
-import importPlugin from "eslint-plugin-import";
-import nPlugin from "eslint-plugin-n";
-import promisePlugin from "eslint-plugin-promise";
-
+import globals from 'globals'
+import pluginJs from '@eslint/js'
+import pluginVue from 'eslint-plugin-vue'
+import standard from 'eslint-config-standard'
+import importPlugin from 'eslint-plugin-import'
+import nPlugin from 'eslint-plugin-n'
+import promisePlugin from 'eslint-plugin-promise'
 
 export default [
-  {files: ["**/*.{js,mjs,cjs,vue}"]},
-  {languageOptions: { globals: {...globals.browser, ...globals.node} }},
+  { files: ['**/*.{js,mjs,cjs,vue}'] },
+  { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   {
     name: 'standard',
@@ -20,5 +19,5 @@ export default [
       promise: promisePlugin
     }
   },
-  ...pluginVue.configs["flat/essential"]
-];
+  ...pluginVue.configs['flat/essential']
+]
