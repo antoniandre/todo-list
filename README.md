@@ -1,3 +1,6 @@
+[![JavaScript Style Guide](https://img.shields.io/badge/code_style-standard-brightgreen.svg)](https://standardjs.com)
+
+
 # todolist
 This project is a full stack practice ground created during my workshops.
 
