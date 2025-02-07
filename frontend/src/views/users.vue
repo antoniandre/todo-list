@@ -14,8 +14,7 @@ fetch('/api/users', {
   .then(response => {
     if (!response.ok) {
       if (response.status === 403) router.push('/login')
-    }
-    else return response.json()
+    } else return response.json()
   })
   .then(response => {
     users.value = response.users
@@ -115,6 +114,7 @@ onUnmounted(() => {
 </template>
 
 <style lang="scss">
+@use 'sass:color';
 .main-content--users {
   max-width: 450px;
 
@@ -174,7 +174,7 @@ onUnmounted(() => {
 
       &--add {
         font-size: 2rem;
-        background-color: rgba(lighten($primary-color, 25), 0.2);
+        background-color: rgba(color.adjust($primary-color, $lightness: 25%), 0.2);
       }
     }
     &:nth-of-type(1) .user__avatar {background-color: rgba(0, 0, 255, 0.1);}

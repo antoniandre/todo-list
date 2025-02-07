@@ -1,3 +1,5 @@
+@use './variables' as *;
+
 @font-face {
   font-family: 'title-font';
   src: url('@/assets/autography.woff2') format('woff2'),
