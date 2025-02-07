@@ -2,35 +2,41 @@
 <div class="main-content main-content--todo-list">
   <h1 class="main-content__title">To Do List</h1>
   <div v-if="error" class="message message--error">Oops. Something went wrong.</div>
-  <ul class="tasks">
-    <li
-      v-for="task in tasks"
-      :key="task.id"
-      @click="saveTask(task)"
-      @contextmenu.prevent="openContextMenu(task)"
-      :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed , 'task--focused': task.focused }">
-      <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
-      <label class="task__label">{{ task.label }}</label>
-      <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
-      <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
-    </li>
-    <!-- New task. -->
-    <li
-      ref="newTaskElement"
-      class="task task--new"
-      :class="{ checked: newTask.completed }"
-      @click="newTask.completed = !newTask.completed">
-      <i :class="`task__icon ${newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
-      <input
-        v-model="newTask.label"
-        @click.stop
-        @keypress.enter="saveNewTask(newTask)"
-        type="text"
-        placeholder="New task..."
-        class="input-field">
-      <button @click.stop="saveNewTask(newTask)">OK</button>
-    </li>
-  </ul>
+  <div class="w-flex">
+    <ul
+      v-for="(status, i) in todoStatuses"
+      :key="i"
+      :class="`tasks tasks--${status}`">
+      <li
+        v-for="task in tasksPerStatus[status]"
+        :key="task.id"
+        @click="saveTask(task)"
+        @contextmenu.prevent="openContextMenu(task)"
+        :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed , 'task--focused': task.focused }">
+        <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
+        <label class="task__label">{{ task.label }}</label>
+        <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
+        <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
+      </li>
+      <!-- New task. -->
+      <li
+        ref="newTaskElement"
+        class="task task--new"
+        :class="{ checked: newTask.completed }"
+        @click="newTask.completed = !newTask.completed">
+        <i :class="`task__icon ${newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
+        <input
+          v-model="newTask.label"
+          @click.stop
+          @keypress.enter="saveNewTask(newTask)"
+          type="text"
+          placeholder="New task..."
+          class="input-field">
+        <button @click.stop="saveNewTask(newTask)">OK</button>
+      </li>
+    </ul>
+  </div>
+
   <div v-if="contextMenu.show" ref="contextMenuElement" class="context-menu">
     <label for="assignee" class="field__label">Assign to: </label>
     <select v-model="contextMenu.task.assignee" id="assignee" class="field__input">
@@ -43,7 +49,7 @@
 </template>
 
 <script setup>
-import { ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
 
@@ -63,6 +69,19 @@ const contextMenu = ref({
   task: {}
 })
 const contextMenuElement = ref(null)
+
+const todoStatuses = ['todo', 'doing', 'done']
+
+// Group tasks by status in a single computed for performance.
+const tasksPerStatus = computed(() => {
+  const tasksPerStatus = {}
+  tasks.value.forEach(task => {
+    if (!tasksPerStatus[task.status]) tasksPerStatus[task.status] = []
+    tasksPerStatus[task.status].push(task)
+  })
+
+  return tasksPerStatus
+})
 
 const saveTask = task => {
   fetch('/api/tasks', {
@@ -148,7 +167,13 @@ fetch('/api/tasks', {
     else return response.json()
   })
   .then(response => {
-    tasks.value = response.tasks
+    // @todo: stub to remove when backend is ready.
+    tasks.value = response.tasks.map(task => {
+      return {
+        ...task,
+        status: ['todo', 'doing', 'done'][Math.floor(Math.random() * 3)]
+      }
+    })
     users.value = response.users
   })
   .catch(() => {
