@@ -7,7 +7,7 @@ import nPlugin from 'eslint-plugin-n'
 import promisePlugin from 'eslint-plugin-promise'
 
 export default [
-  { files: ['**/*.{js,mjs,cjs,vue}'] },
+  { files: ['**/*.{js,mjs,vue}'] },
   { languageOptions: { globals: { ...globals.browser, ...globals.node } } },
   pluginJs.configs.recommended,
   {
