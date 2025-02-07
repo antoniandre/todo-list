@@ -168,12 +168,10 @@ fetch('/api/tasks', {
   })
   .then(response => {
     // @todo: stub to remove when backend is ready.
-    tasks.value = response.tasks.map(task => {
-      return {
-        ...task,
-        status: ['todo', 'doing', 'done'][Math.floor(Math.random() * 3)]
-      }
-    })
+    tasks.value = response.tasks.map(task => ({
+      ...task,
+      status: todoStatuses[Math.floor(Math.random() * 3)]
+    }))
     users.value = response.users
   })
   .catch(() => {
