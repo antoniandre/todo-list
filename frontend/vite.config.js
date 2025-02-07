@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [vue()],
   server: {
     proxy: {
-      '/api': 'http://localhost:80/todolist/api'
+      '/api': 'http://localhost:80/todo-list/api'
     }
   },
 
