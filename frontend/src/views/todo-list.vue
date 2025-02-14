@@ -3,38 +3,36 @@
   <h1 class="main-content__title">To Do List</h1>
   <div v-if="error" class="message message--error">Oops. Something went wrong.</div>
   <div class="w-flex">
-    <ul
+    <div
       v-for="(status, i) in todoStatuses"
       :key="i"
       :class="`tasks tasks--${status}`">
-      <li
-        v-for="task in tasksPerStatus[status]"
-        :key="task.id"
-        @click="saveTask(task)"
-        @contextmenu.prevent="openContextMenu(task)"
-        :class="{ [`task task--${task.id}`]: true, 'task--completed': task.completed , 'task--focused': task.focused }">
-        <i :class="`task__icon ${task.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
-        <label class="task__label">{{ task.label }}</label>
-        <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
-        <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
-      </li>
-      <!-- New task. -->
-      <li
-        ref="newTaskElement"
-        class="task task--new"
-        :class="{ checked: newTask.completed }"
-        @click="newTask.completed = !newTask.completed">
-        <i :class="`task__icon ${newTask.completed ? 'i-checkbox-checked' : 'i-checkbox-unchecked'}`"></i>
-        <input
-          v-model="newTask.label"
-          @click.stop
-          @keypress.enter="saveNewTask(newTask)"
-          type="text"
-          placeholder="New task..."
-          class="input-field">
-        <button @click.stop="saveNewTask(newTask)">OK</button>
-      </li>
-    </ul>
+      <h2>{{ status }}</h2>
+      <ul>
+        <li
+          v-for="task in tasksPerStatus[status]"
+          :key="task.id"
+          @click="saveTask(task)"
+          @contextmenu.prevent="openContextMenu(task)"
+          :class="{ [`task task--${task.id} task--${status}`]: true, 'task--focused': task.focused }">
+          <label class="task__label">{{ task.label }}</label>
+          <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
+          <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
+        </li>
+        <!-- New task. -->
+        <li
+          ref="newTaskElement"
+          class="task task--new">
+          <input
+            v-model="newTask.label"
+            @keypress.enter="saveNewTask(status)"
+            type="text"
+            placeholder="New task..."
+            class="input-field">
+          <button @click="saveNewTask(status)">OK</button>
+        </li>
+      </ul>
+    </div>
   </div>
 
   <div v-if="contextMenu.show" ref="contextMenuElement" class="context-menu">
@@ -59,7 +57,7 @@ const tasks = ref([])
 const newTask = ref({
   id: null,
   label: '',
-  completed: false
+  status: 'todo'
 })
 const newTaskElement = ref(null)
 const users = ref([])
@@ -87,11 +85,11 @@ const saveTask = task => {
   fetch('/api/tasks', {
     method: 'put',
     headers: setHeaders(),
-    body: JSON.stringify({ id: task.id, completed: !task.completed })
+    body: JSON.stringify({ id: task.id, status: task.status })
   })
     .then(response => response.json())
     .then(response => {
-      task.completed = response.task.completed
+      task.status = response.task.status === 'done'
       loading.value = false
     }).catch(e => {
       error.value = true
@@ -99,19 +97,16 @@ const saveTask = task => {
     })
 }
 
-const saveNewTask = () => {
+const saveNewTask = status => {
   fetch('/api/tasks', {
     method: 'post',
     headers: setHeaders(),
-    body: JSON.stringify({
-      label: newTask.value.label,
-      completed: newTask.value.completed
-    })
+    body: JSON.stringify({ label: newTask.value.label, status })
   })
     .then(response => response.json())
     .then(response => {
       tasks.value.push(response.task)
-      newTask.value = Object.assign(newTask.value, { label: '', completed: false })
+      newTask.value = Object.assign(newTask.value, { label: '', status })
       nextTick(() => {
         newTaskElement.value.scrollIntoView({ behavior: 'smooth' })
       })
@@ -212,29 +207,6 @@ onBeforeUnmount(() => {
     &--focused {background-color: rgba(255, 255, 255, 0.2);}
   }
 
-  .task__icon {
-    position: relative;
-    font-size: 20px;
-    width: 1.5rem;
-    height: 1.5rem;
-
-    &:before {padding-top: 3px;}
-    &:after {
-      content: '';
-      position: absolute;
-      top: 0;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      border-radius: 99em;
-      background-color: currentColor;
-      aspect-ratio: 1;
-      opacity: 0;
-    }
-  }
-  .task--completed .task__icon {color: $primary-color;}
-  .task:hover .task__icon:after {opacity: 0.25;}
-
   .task__label {
     position: relative;
     margin-left: 8px;
@@ -250,12 +222,6 @@ onBeforeUnmount(() => {
       border-top: 1px solid $primary-color;
       transition: 0.2s ease-in-out;
     }
-  }
-
-  .task--completed .task__label {
-    color: $primary-color;
-
-    &:before {width: 100%;}
   }
 
   .arrow {
@@ -305,11 +271,6 @@ onBeforeUnmount(() => {
     i, button {flex-shrink: 0;}
 
     .input-field {margin: 0 8px;}
-
-    &.checked .input-field {
-      color: rgba(0, 150, 136, 0.5);
-      text-decoration: line-through;
-    }
 
     button {
       margin-left: auto;
