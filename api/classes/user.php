@@ -26,18 +26,13 @@ class User {
    */
   public static function getAll(): array {
     $db = Database::get();
-    $result = $db->query('SELECT * FROM users');
+    $users = $db->fetchAll('SELECT * FROM users', [], ['foreach' => function($row) {
+      return new self($row->username, $row->firstName, $row->lastName, $row->email, (int)$row->id);
+    }]);
 
-    if ($result === false) throw new Exception('Could not retrieve the users from the database.', 500);
-    else {
-      $rows = [];
-      while ($userRow = $result->fetch_object()) {
-        $user = new self($userRow->username, $userRow->firstName, $userRow->lastName, $userRow->email, (int)$userRow->id);
-        $rows[] = $user;
-      }
-    }
+    if ($users === false) throw new Exception('Could not retrieve the users from the database.', 500);
 
-    return $rows ?? null;
+    return $users;
   }
 
   /**
@@ -48,10 +43,9 @@ class User {
    */
   public static function get(int $id): User {
     $db = Database::get();
-    $result = $db->query("SELECT * FROM `users` WHERE `id` = " . (int)$id);
-    $user = $result->fetch_object();
+    $user = $db->fetch("SELECT * FROM `users` WHERE `id` = $id");
 
-    if ($result === false) throw new Exception('Could not read the user from the database.', 500);
+    if ($user === false) throw new Exception('Could not read the user from the database.', 500);
     elseif (!$user) throw new Exception('The user was not found.', 404);
     else return new self($user->username, $user->firstName, $user->lastName, $user->email, (int)$user->id);
   }
@@ -63,13 +57,15 @@ class User {
    */
   public function save(): User {
     $db = Database::get();
-    $firstName = $db->escape($this->firstName);
-    $lastName = $db->escape($this->lastName);
-    $result = $db->query("INSERT INTO `users` (`firstName`, `lastName`) VALUES ('$firstName', '$lastName')");
+    list($rowCount, $insertedId, $error) = $db->query(<<<SQL
+      INSERT INTO `users` (`firstName`, `lastName`)
+      VALUES (':firstName', ':lastName')
+    SQL,
+    ['firstName' => $this->firstName, 'lastName' => $this->lastName]);
 
-    if ($result === false) throw new Exception('The user could not be saved in the database.', 500);
+    if ($error) throw new Exception('The user could not be saved in the database.', 500);
     // Read from DB in case the insertion in DB results in different values of the user (e.g. cascading actions from FK).
-    else return self::get($db->getInsertedId());
+    else return self::get($insertedId);
   }
 
   /**
@@ -89,9 +85,9 @@ class User {
    */
   public static function deleteById(int $id): bool {
     $db = Database::get();
-    $result = $db->query("DELETE FROM `users` WHERE `id` = $id");
+    list($rowCount, $insertedId, $error) = $db->query("DELETE FROM `users` WHERE `id` = $id");
 
-    if ($result === false) throw new Exception('The user could not be deleted from the database.', 500);
+    if ($error) throw new Exception('The user could not be deleted from the database.', 500);
     return true;
   }
 
@@ -108,26 +104,29 @@ class User {
     $db = Database::get();
 
     $changes = [];
+    $params = [];
     if ($username) {
-      $username = $db->escape($username);
-      $changes[] = "`username` = '$username'";
+      $changes[] = "`username` = ':$username'";
+      $params['username'] = $username;
     }
     if ($firstName) {
-      $firstName = $db->escape($firstName);
-      $changes[] = "`firstName` = '$firstName'";
+      $changes[] = "`firstName` = ':$firstName'";
+      $params['firstName'] = $firstName;
     }
     if ($lastName) {
-      $lastName = $db->escape($lastName);
-      $changes[] = "`lastName` = '$lastName'";
+      $changes[] = "`lastName` = ':$lastName'";
+      $params['lastName'] = $lastName;
     }
     if ($email) {
-      $email = $db->escape($email);
-      $changes[] = "`email` = '$email'";
+      $changes[] = "`email` = ':$email'";
+      $params['email'] = $email;
     }
 
-    $result = $db->query("UPDATE `users` SET " . implode(',', $changes) . " WHERE `id` = $this->id");
+    if (count($changes)) $changes = implode(',', $changes);
+    else throw new Exception('No changes were provided.', 400);
+    list($rowCount, $insertedId, $error) = $db->query("UPDATE `users` SET $params WHERE `id` = $this->id");
 
-    if ($result === false) throw new Exception('The user could not be saved in the database.', 500);
+    if ($error) throw new Exception('The user could not be saved in the database.', 500);
 
     // Read from DB in case the update in DB results in different values of the user (e.g. cascading actions from FK).
     else return self::get($this->id);
@@ -144,8 +143,10 @@ class User {
   public static function logIn(string $username, string $password): array|false {
     if ($username && $password) {
       $db = Database::get();
-      $result = $db->query("SELECT * FROM `users` WHERE `username` = '$username'");
-      $user = $result->fetch_object();
+      $user = $db->fetch(
+        "SELECT * FROM `users` WHERE `username` = ':username'",
+        ['username' => $username]
+      );
 
       if ($user && password_verify($password, $user->password)) {
         $user = new self($user->username, $user->firstName, $user->lastName, $user->email, $user->id);

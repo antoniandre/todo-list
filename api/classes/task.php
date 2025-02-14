@@ -1,18 +1,18 @@
 <?php
 
 class Task {
-  public $id;
-  public $label;
-  public $description;
-  public $completed;
-  public $assignee;
-  public $created;
+  public ?int $id;
+  public ?string $label;
+  public ?string $description;
+  public string $status;
+  public ?int $assignee;
+  public string $created;
 
-  public function __construct(string $label, ?string $description, bool $completed, ?int $assignee, ?int $id = null) {
+  public function __construct(string $label, ?string $description, string $status, ?int $assignee, ?int $id = null) {
     $this->id = $id;
     $this->label = $label;
     $this->description = $description;
-    $this->completed = $completed;
+    $this->status = $status;
     $this->assignee = $assignee;
   }
 
@@ -23,18 +23,13 @@ class Task {
    */
   public static function getAll(): array {
     $db = Database::get();
-    $result = $db->query('SELECT * FROM tasks');
+    $tasks = $db->fetchAll('SELECT * FROM tasks', [], ['foreach' => function($row) {
+      return new self($row->label, $row->description, $row->status, (int)$row->assignee, (int)$row->id);
+    }]);
 
-    if ($result === false) throw new Exception('Could not retrieve the tasks from the database.', 500);
-    else {
-      $rows = [];
-      while ($object = $result->fetch_object()) {
-        $task = new self($object->label, $object->description, (bool)$object->completed, $object->assignee, (int)$object->id);
-        $rows[] = $task;
-      }
-    }
+    if ($tasks === false) throw new Exception('Could not retrieve the tasks from the database.', 500);
 
-    return $rows ?? [];
+    return $tasks;
   }
 
   /**
@@ -45,12 +40,11 @@ class Task {
    */
   public static function get(int $id): Task {
     $db = Database::get();
-    $result = $db->query("SELECT * FROM `tasks` WHERE `id` = " . (int)$id);
-    if ($result === false) throw new Exception('Could not read the task from the database.', 500);
+    $task = $db->fetch("SELECT * FROM `tasks` WHERE `id` = " . (int)$id);
+    if ($task === false) throw new Exception('Could not read the task from the database.', 500);
 
-    $task = $result->fetch_object();
     if (!$task) throw new Exception('The task was not found.', 404);
-    else return new self($task->label, $task->description, (bool)$task->completed, $task->assignee, (int)$task->id);
+    else return new self($task->label, $task->description, $task->status, (int)$task->assignee, (int)$task->id);
   }
 
   /**
@@ -60,19 +54,19 @@ class Task {
    */
   public function save(): Task {
     $db = Database::get();
-    $label = $db->escape($this->label ?? '');
-    $description = $db->escape($this->description ?? '');
-    $completed = (int)$this->completed;
-    $assignee = $this->assignee ?? null ? (int)$this->assignee : 'NULL';
-    $sql = <<<SQL
-      INSERT INTO `tasks` (`label`, `description`, `completed`, `assignee`)
-      VALUES ('$label', '$description', $completed, $assignee)
-    SQL;
-    $result = $db->query($sql);
+    list($rowCount, $insertedId, $error) = $db->query(<<<SQL
+      INSERT INTO `tasks` (`label`, `description`, `status`, `assignee`)
+      VALUES (':label', ':description', ':status', :assignee)
+    SQL, [
+      'label' => $label ?? '',
+      'description' => $description ?? '',
+      'status' => $status ?? 'todo',
+      'assignee' => $assignee ?? null ? (int)$this->assignee : 'NULL'
+    ]);
 
-    if ($result === false) throw new Exception('The task could not be saved in the database.', 500);
+    if ($error) throw new Exception('The task could not be saved in the database.', 500);
     // Read from DB in case the insertion in DB results in different values of the task (e.g. cascading actions from FK).
-    else return self::get($db->getInsertedId());
+    else return self::get($insertedId);
   }
 
   /**
@@ -92,9 +86,9 @@ class Task {
    */
   public static function deleteById(int $id): bool {
     $db = Database::get();
-    $result = $db->query("DELETE FROM `tasks` WHERE `id` = $id");
+    list($rowCount, $insertedId, $error) = $db->query("DELETE FROM `tasks` WHERE `id` = $id");
 
-    if ($result === false) throw new Exception('The task could not be deleted from the database.', 500);
+    if ($error) throw new Exception('The task could not be deleted from the database.', 500);
     return true;
   }
 
@@ -103,28 +97,38 @@ class Task {
    *
    * @param string $label the new task label.
    * @param string $description the new task description.
-   * @param integer $completed: 0 or 1 for a completed task.
+   * @param integer $status: 0 or 1 for a status task.
    * @param integer $assignee: the user id.
    * @return Task The task instance if it worked, or an exception will be thrown.
    */
-  function update(?string $label, ?string $description, ?bool $completed, ?int $assignee): Task {
+  function update(?string $label, ?string $description, ?string $status, ?int $assignee): Task {
     $db = Database::get();
-
+    $params = [];
     $changes = [];
+
     if ($label) {
-      $label = $db->escape($label);
-      $changes[] = "`label` = '$label'";
+      $changes[] = "`label` = :label";
+      $params['label'] = $label;
     }
     if ($description) {
-      $description = $db->escape($description);
-      $changes[] = "`description` = '$description'";
+      $changes[] = "`description` = :description";
+      $params['description'] = $description;
     }
-    if (is_bool($completed)) $changes[] = "`completed` = " . (int)$completed;
-    if (is_int($assignee)) $changes[] = "`assignee` = $assignee";
+    if (!empty($status)) {
+      $changes[] = "`status` = :status";
+      $params['status'] = $status;
+    }
+    if (is_int($assignee)) {
+      $changes[] = "`assignee` = :assignee";
+      $params['assignee'] = $assignee;
+    }
 
-    $result = $db->query("UPDATE `tasks` SET " . implode(',', $changes) . " WHERE `id` = $this->id");
+    if (count($changes)) $changes = implode(',', $changes);
+    else throw new Exception('No changes were provided.', 400);
 
-    if ($result === false) throw new Exception('The task could not be saved in the database.', 500);
+    list($rowCount, $insertedId, $error) = $db->query("UPDATE `tasks` SET $changes WHERE `id` = $this->id", $params);
+
+    if ($error) throw new Exception('The task could not be saved in the database.', 500);
 
     // Read from DB in case the update in DB results in different values of the task (e.g. cascading actions from FK).
     else return self::get($this->id);
