@@ -18,7 +18,7 @@ __Backend:__
     `id` smallint(6) NOT NULL AUTO_INCREMENT,
     `label` text NOT NULL,
     `description` text,
-    `completed` tinyint(1) NOT NULL DEFAULT '0',
+    `status` enum('todo','doing','done') NOT NULL DEFAULT 'todo',
     `assignee` int(4) DEFAULT NULL,
     `created` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP
   ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
