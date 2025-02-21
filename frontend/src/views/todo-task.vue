@@ -16,8 +16,12 @@
       <textarea v-model="task.description" id="description" rows="10" class="field__input"></textarea>
     </div>
     <div class="field">
-      <label for="completed" class="field__label">completed</label>
-      <w-checkbox v-model="task.completed" id="completed"></w-checkbox>
+      <label for="status" class="field__label">Status</label>
+      <select v-model="task.status" id="status" class="field__input">
+        <option v-for="status in statuses" :key="status" :value="status">
+          {{ status }}
+        </option>
+      </select>
     </div>
     <div class="field">
       <label for="assignee" class="field__label">Assignee</label>
@@ -35,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
 
@@ -46,11 +50,12 @@ const props = defineProps({
 })
 
 const loading = ref(false)
+const statuses = ['todo', 'doing', 'done']
 
-const task = ref({
+let task = reactive({
   id: null,
   label: '',
-  completed: false,
+  status: 'todo',
   description: '',
   assignee: null,
   created: ''
@@ -71,7 +76,7 @@ fetch(`/api/tasks/${props.id}`, { method: 'get', headers: setHeaders() })
     return response.json()
   })
   .then(response => {
-    task.value = response.task
+    task = Object.assign(task, response.task)
     users.value = response.users
   })
   .catch(() => {
@@ -84,11 +89,11 @@ const save = () => {
   fetch('/api/tasks', {
     method: 'put',
     headers: setHeaders(),
-    body: JSON.stringify(task.value)
+    body: JSON.stringify(task)
   })
     .then(response => response.json())
     .then(response => {
-      task.value = Object.assign(task.value, response.task)
+      task = Object.assign(task, response.task)
     }).catch(e => {
       console.log(e)
     }).finally(() => {
