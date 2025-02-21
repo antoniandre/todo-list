@@ -2,19 +2,18 @@
 <div class="main-content main-content--todo-list">
   <h1 class="main-content__title">To Do List</h1>
   <div v-if="error" class="message message--error">Oops. Something went wrong.</div>
-  <div class="w-flex">
+  <div class="w-flex gap4">
     <div
       v-for="(status, i) in todoStatuses"
       :key="i"
-      :class="`tasks tasks--${status}`">
-      <h2>{{ status }}</h2>
+      :class="`task-list task-list--${status.value}`">
+      <h2 class="text-center lh1">{{ status.label }}</h2>
       <ul>
         <li
-          v-for="task in tasksPerStatus[status]"
+          v-for="task in tasksPerStatus[status.value]"
           :key="task.id"
-          @click="saveTask(task)"
           @contextmenu.prevent="openContextMenu(task)"
-          :class="{ [`task task--${task.id} task--${status}`]: true, 'task--focused': task.focused }">
+          :class="{ [`task task--${task.id} task--${status.value}`]: true, 'task--focused': task.focused }">
           <label class="task__label">{{ task.label }}</label>
           <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
           <button class="task__delete i-cross" @click.stop="deleteTask(task.id)"></button>
@@ -24,12 +23,12 @@
           ref="newTaskElement"
           class="task task--new">
           <input
-            v-model="newTasks[status].label"
-            @keypress.enter="saveNewTask(newTasks[status], i)"
+            v-model="newTasks[status.value].label"
+            @keypress.enter="saveNewTask(newTasks[status.value], i)"
             type="text"
             placeholder="New task..."
             class="input-field">
-          <button @click="saveNewTask(newTasks[status], i)">OK</button>
+          <button @click="saveNewTask(newTasks[status.value], i)">OK</button>
         </li>
       </ul>
     </div>
@@ -42,6 +41,7 @@
         {{ user.firstName }} {{ user.lastName }}
       </option>
     </select>
+    <button @click="saveTask(contextMenu.task)">OK</button>
   </div>
 </div>
 </template>
@@ -54,9 +54,13 @@ import { setHeaders } from '@/helpers'
 const router = useRouter()
 const loading = ref(false)
 const tasks = ref([])
-const todoStatuses = ['todo', 'doing', 'done']
+const todoStatuses = [
+  { value: 'todo', label: 'To Do' },
+  { value: 'doing', label: 'Doing' },
+  { value: 'done', label: 'Done' }
+]
 const newTasks = reactive(todoStatuses.reduce((obj, status) => {
-  obj[status] = { id: null, label: '' }
+  obj[status.value] = { id: null, label: '' }
   return obj
 }, {}))
 
@@ -101,7 +105,7 @@ const saveNewTask = (task, columnIndex) => {
   fetch('/api/tasks', {
     method: 'post',
     headers: setHeaders(),
-    body: JSON.stringify({ label: task.label, status: todoStatuses[columnIndex] })
+    body: JSON.stringify({ label: task.label, status: todoStatuses[columnIndex].value })
   })
     .then(response => response.json())
     .then(response => {
@@ -138,12 +142,15 @@ const openContextMenu = task => {
   task.focused = true
 
   nextTick(() => {
-    contextMenuElement.value.style.top = taskDomNode.offsetTop + taskDomNode.offsetHeight + 'px'
+    const { left, top, width, height } = taskDomNode.getBoundingClientRect()
+    contextMenuElement.value.style.left = left + 'px'
+    contextMenuElement.value.style.width = width + 'px'
+    contextMenuElement.value.style.top = top + height + 'px'
   })
 }
 
 const closeContextMenu = e => {
-  if (e.target.matches('.context-menu, .context-menu *')) return
+  if (!contextMenu.value.show || e.target.closest('.context-menu')) return
 
   contextMenu.value.show = false
   contextMenu.value.task.focused = false
@@ -184,22 +191,44 @@ onBeforeUnmount(() => {
   padding-left: 0;
   padding-right: 0;
 
+  &:before {display: none;}
+
   .main-content__title {
     margin: 20px 0 10px;
     text-align: center;
   }
 
-  .tasks {
+  .task-list {
+    position: relative;
     list-style-type: none;
     overflow: auto;
     max-height: 40vh;
+    flex-grow: 1;
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      background-color: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(2px);
+      border-radius: 8px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
+      z-index: -1;
+    }
+
+    h2 {margin-bottom: 0.3em;}
   }
 
   .task {
     position: relative;
     display: flex;
     align-items: center;
-    padding: 5px 30px;
+    padding: 5px 20px;
     transition: 0.2s;
     cursor: pointer;
 
@@ -294,9 +323,7 @@ onBeforeUnmount(() => {
   }
 
   .context-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
+    position: fixed;
     margin-top: -1px;
     padding: 20px;
     flex-grow: 1;

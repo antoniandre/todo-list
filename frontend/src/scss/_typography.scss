@@ -6,10 +6,8 @@
        url('@/assets/autography.woff') format('woff');
 }
 
-h1, .title {
-  font-family: $title-font;
-}
+h1, h2, .title {font-family: $title-font;}
+h1 {font-size: 40px;}
+h2 {font-size: 36px;font-weight: normal;}
 
-p {
-  font-family: $body-font;
-}
+p {font-family: $body-font;}
