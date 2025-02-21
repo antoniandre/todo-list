@@ -24,12 +24,12 @@
           ref="newTaskElement"
           class="task task--new">
           <input
-            v-model="newTasks[i].label"
-            @keypress.enter="saveNewTask(newTasks[i], i)"
+            v-model="newTasks[status].label"
+            @keypress.enter="saveNewTask(newTasks[status], i)"
             type="text"
             placeholder="New task..."
             class="input-field">
-          <button @click="saveNewTask(newTasks[i], i)">OK</button>
+          <button @click="saveNewTask(newTasks[status], i)">OK</button>
         </li>
       </ul>
     </div>
@@ -55,7 +55,10 @@ const router = useRouter()
 const loading = ref(false)
 const tasks = ref([])
 const todoStatuses = ['todo', 'doing', 'done']
-const newTasks = reactive(todoStatuses.map(status => ({ id: null, label: '', status })))
+const newTasks = reactive(todoStatuses.reduce((obj, status) => {
+  obj[status] = { id: null, label: '' }
+  return obj
+}, {}))
 
 const newTaskElement = ref(null)
 const users = ref([])
@@ -98,7 +101,7 @@ const saveNewTask = (task, columnIndex) => {
   fetch('/api/tasks', {
     method: 'post',
     headers: setHeaders(),
-    body: JSON.stringify({ label: task.label, status: task.status })
+    body: JSON.stringify({ label: task.label, status: todoStatuses[columnIndex] })
   })
     .then(response => response.json())
     .then(response => {
