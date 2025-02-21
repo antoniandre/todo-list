@@ -24,12 +24,12 @@
           ref="newTaskElement"
           class="task task--new">
           <input
-            v-model="newTask.label"
-            @keypress.enter="saveNewTask(status)"
+            v-model="newTasks[i].label"
+            @keypress.enter="saveNewTask(newTasks[i], i)"
             type="text"
             placeholder="New task..."
             class="input-field">
-          <button @click="saveNewTask(status)">OK</button>
+          <button @click="saveNewTask(newTasks[i], i)">OK</button>
         </li>
       </ul>
     </div>
@@ -47,18 +47,16 @@
 </template>
 
 <script setup>
-import { computed, ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
+import { computed, reactive, ref, nextTick, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { setHeaders } from '@/helpers'
 
 const router = useRouter()
 const loading = ref(false)
 const tasks = ref([])
-const newTask = ref({
-  id: null,
-  label: '',
-  status: 'todo'
-})
+const todoStatuses = ['todo', 'doing', 'done']
+const newTasks = reactive(todoStatuses.map(status => ({ id: null, label: '', status })))
+
 const newTaskElement = ref(null)
 const users = ref([])
 const error = ref(false)
@@ -68,7 +66,6 @@ const contextMenu = ref({
 })
 const contextMenuElement = ref(null)
 
-const todoStatuses = ['todo', 'doing', 'done']
 
 // Group tasks by status in a single computed for performance.
 const tasksPerStatus = computed(() => {
@@ -97,18 +94,18 @@ const saveTask = task => {
     })
 }
 
-const saveNewTask = status => {
+const saveNewTask = (task, columnIndex) => {
   fetch('/api/tasks', {
     method: 'post',
     headers: setHeaders(),
-    body: JSON.stringify({ label: newTask.value.label, status })
+    body: JSON.stringify({ label: task.label, status: task.status })
   })
     .then(response => response.json())
     .then(response => {
       tasks.value.push(response.task)
-      newTask.value = Object.assign(newTask.value, { label: '', status })
+      task.label = ''
       nextTick(() => {
-        newTaskElement.value.scrollIntoView({ behavior: 'smooth' })
+        newTaskElement.value[columnIndex].scrollIntoView({ behavior: 'smooth' })
       })
     }).catch(e => {
       error.value = true
@@ -250,6 +247,7 @@ onBeforeUnmount(() => {
   }
 
   .task__delete {
+    flex-shrink: 0;
     margin-left: 8px;
     border-radius: 99em;
     background-color: rgba(255, 0, 0, 0.35);

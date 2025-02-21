@@ -56,12 +56,12 @@ class Task {
     $db = Database::get();
     list($rowCount, $insertedId, $error) = $db->query(<<<SQL
       INSERT INTO `tasks` (`label`, `description`, `status`, `assignee`)
-      VALUES (':label', ':description', ':status', :assignee)
+      VALUES (:label, :description, :status, :assignee)
     SQL, [
-      'label' => $label ?? '',
-      'description' => $description ?? '',
-      'status' => $status ?? 'todo',
-      'assignee' => $assignee ?? null ? (int)$this->assignee : 'NULL'
+      'label' => $this->label ?? '',
+      'description' => $this->description ?? '',
+      'status' => $this->status ?? 'todo',
+      'assignee' => empty($this->assignee) ? null : (int)$this->assignee
     ]);
 
     if ($error) throw new Exception('The task could not be saved in the database.', 500);
