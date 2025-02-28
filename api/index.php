@@ -1,4 +1,5 @@
 <?php
+
 // MAIN.
 // --------------------------------------------------------
 defineConstants();
@@ -69,6 +70,22 @@ function runControllerMethod() {
 
   if ($found && is_callable($method)) $method(...$params);
   else output(404, 'Method not found.') && exit;
+}
+
+/**
+ * Get the configuration from the config.ini file.
+ * If there is a config.local.ini, any rule in it will override the one in the config.ini file.
+ *
+ * @param bool $forceUpdate since the object result is cached, forcing refresh will read the file again.
+ * @return object the configuration object.
+ */
+function getConfig(bool $forceUpdate = false): object {
+  if (isset($GLOBALS['config']) && !$forceUpdate) return $GLOBALS['config'];
+
+  $baseConfig = parse_ini_file(__DIR__ . '/config.ini');
+  $overrideConfig = @parse_ini_file(__DIR__ . '/config.local.ini');
+  $GLOBALS['config'] = (object)array_merge($baseConfig, $overrideConfig ?: []);
+  return (object)array_merge($baseConfig, $overrideConfig ?: []);
 }
 
 /**

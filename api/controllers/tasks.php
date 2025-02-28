@@ -67,7 +67,7 @@ function createTask () {
     $task = new Task(
       INPUT->label ?? '',
       INPUT->description ?? '',
-      INPUT->completed ?? false,
+      INPUT->status ?? 'todo',
       INPUT->assignee ?? null
     );
     $task = $task->save();
@@ -96,7 +96,12 @@ function deleteTask () {
 function updateTask () {
   try {
     $task = Task::get(INPUT->id);
-    $task = $task->update(INPUT->label, INPUT->description, INPUT->completed, INPUT->assignee);
+    $task = $task->update(
+      INPUT->label ?? null,
+      INPUT->description ?? null,
+      INPUT->status ?? 'todo',
+      INPUT->assignee ?? null
+    );
   }
   catch (Exception $e) {
     $code = $e->getCode();
