@@ -6,13 +6,18 @@
     <div
       v-for="(status, i) in todoStatuses"
       :key="i"
-      :class="`task-list task-list--${status.value}`">
+      :class="`task-list task-list--${status.value} w-flex column`">
       <h2 class="text-center lh1">{{ status.label }}</h2>
-      <ul>
+      <ul
+        class="grow"
+        @drop="onTaskDrop($event, status.value)"
+        @dragover.prevent>
         <li
           v-for="task in tasksPerStatus[status.value]"
           :key="task.id"
           @contextmenu.prevent="openContextMenu(task)"
+          draggable="true"
+          @dragstart="onTaskDragStart($event, task)"
           :class="{ [`task task--${task.id} task--${status.value}`]: true, 'task--focused': task.focused }">
           <label class="task__label">{{ task.label }}</label>
           <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
@@ -93,7 +98,7 @@ const saveTask = task => {
   })
     .then(response => response.json())
     .then(response => {
-      task.status = response.task.status === 'done'
+      task.status = response.task.status
       loading.value = false
     }).catch(e => {
       error.value = true
@@ -155,6 +160,19 @@ const closeContextMenu = e => {
   contextMenu.value.show = false
   contextMenu.value.task.focused = false
   contextMenu.value.task = null
+}
+
+const onTaskDragStart = (e, task) => {
+  task.focused = true
+  e.dataTransfer.setData('taskId', task.id)
+}
+
+const onTaskDrop = (e, status) => {
+  e.preventDefault()
+  const taskId = ~~e.dataTransfer.getData('taskId')
+  const task = tasks.value.find(task => task.id === taskId)
+  task.status = status
+  saveTask(task)
 }
 
 fetch('/api/tasks', {
