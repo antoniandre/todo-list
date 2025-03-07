@@ -48,20 +48,6 @@ header {
   padding: 40px;
   flex-grow: 1;
   z-index: 0;
-
-  &:before {
-    content: "";
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    background-color: rgba(255, 255, 255, 0.12);
-    backdrop-filter: blur(2px);
-    border-radius: 8px;
-    box-shadow: 0 0 12px rgba(0, 0, 0, 0.05);
-    z-index: -1;
-  }
 }
 
 
