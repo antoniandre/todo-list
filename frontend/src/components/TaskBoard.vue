@@ -1,10 +1,6 @@
 <template lang="pug">
-div(
-  :class="[
-    'task-board',
-    `task-board--${status.value}`,
-    { 'task-board--drag-over': isDragOver }
-  ]"
+.task-board(
+  :class="{ [`task-board--${status.value}`]: true, 'task-board--drag-over': isDragOver }"
   @dragover.prevent="onDragOver"
   @dragleave="onDragLeave"
   @drop="onDrop"
