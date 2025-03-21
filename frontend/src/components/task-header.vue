@@ -64,12 +64,12 @@ const completionPercentage = computed(() => {
   &__title-container {
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
   }
 
   &__title {
     margin: 0;
     font-size: 2.5rem;
+    height: 1.5em;
     font-weight: 800;
     background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
     -webkit-background-clip: text;
@@ -80,9 +80,9 @@ const completionPercentage = computed(() => {
 
   &__subtitle {
     margin: 0;
-    color: var(--text-dark);
-    font-size: 1.1rem;
-    font-weight: 500;
+    color: var(--text-light);
+    font-size: 1rem;
+    font-style: italic;
   }
 
   &__stats {
@@ -142,6 +142,68 @@ const completionPercentage = computed(() => {
         border-radius: 2px;
       }
     }
+  }
+}
+
+// Stats component
+.stat {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: white;
+  border-radius: var(--border-radius-sm);
+  box-shadow: var(--shadow-sm);
+  transition: var(--transition-fast);
+  min-width: 180px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-md);
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    font-size: 1.3rem;
+  }
+
+  &--total .stat__icon {
+    background: rgba(58, 86, 228, 0.15);
+    color: var(--primary-color);
+  }
+
+  &--completed .stat__icon {
+    background: rgba(11, 181, 224, 0.15);
+    color: var(--success-color);
+  }
+
+  &--progress .stat__icon {
+    background: rgba(233, 30, 99, 0.15);
+    color: var(--danger-color);
+  }
+
+  &__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+  }
+
+  &__number {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: var(--text-dark);
+  }
+
+  &__label {
+    font-size: 0.9rem;
+    color: var(--text-light);
+    font-weight: 500;
   }
 }
 </style>

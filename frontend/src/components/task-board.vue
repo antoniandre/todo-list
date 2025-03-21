@@ -143,17 +143,9 @@ onUnmounted(() => {
   border: 1px solid rgba(0, 0, 0, 0.05);
   min-height: 200px;
 
-  &--todo {
-    border-top: 5px solid var(--board-todo-color);
-  }
-
-  &--doing {
-    border-top: 5px solid var(--board-doing-color);
-  }
-
-  &--done {
-    border-top: 5px solid var(--board-done-color);
-  }
+  &--todo {border-top: 5px solid var(--board-todo-color);}
+  &--doing {border-top: 5px solid var(--board-doing-color);}
+  &--done {border-top: 5px solid var(--board-done-color);}
 
   &--drag-over {
     transform: scale(1.02);
@@ -161,9 +153,7 @@ onUnmounted(() => {
     border-color: rgba(0, 0, 0, 0.1);
   }
 
-  &--collapsed {
-    min-height: auto;
-  }
+  &--collapsed {min-height: auto;}
 
   &__header {
     display: flex;

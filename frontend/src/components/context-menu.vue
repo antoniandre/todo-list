@@ -180,6 +180,54 @@ onBeforeUnmount(() => {
     }
   }
 
+  /* Field styles */
+  .field {
+    margin-bottom: 1.5rem;
+
+    &__label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      font-size: 0.95rem;
+    }
+
+    &__input-container {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    &__input {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: var(--border-radius-sm);
+      font-size: 1rem;
+      color: var(--text-dark);
+      background: white;
+      transition: var(--transition-fast);
+      appearance: none;
+
+      &:focus {
+        outline: none;
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(58, 86, 228, 0.1);
+      }
+
+      &::placeholder {
+        color: var(--text-muted);
+      }
+    }
+
+    &__icon {
+      position: absolute;
+      right: 1rem;
+      color: var(--text-light);
+      pointer-events: none;
+    }
+  }
+
   /* Responsive styles for mobile devices */
   @media (max-width: 768px) {
     width: 90vw;
@@ -208,6 +256,15 @@ onBeforeUnmount(() => {
     &__button {
       padding: 0.85rem;
       font-size: 0.95rem;
+    }
+
+    .field {
+      margin-bottom: 1.25rem;
+
+      &__input {
+        padding: 0.7rem 0.9rem;
+        font-size: 16px; /* Prevent zoom on iOS */
+      }
     }
 
     /* Custom scrollbar for context menu */
