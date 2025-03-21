@@ -146,7 +146,7 @@ onMounted(() => {
 </script>
 
 <style lang="scss">
-@import '@/scss/task-components.scss';
+@use '../scss/task-components.scss' as *;
 
 .main-content--todo-list {
   padding: 2rem;

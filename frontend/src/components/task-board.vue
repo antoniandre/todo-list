@@ -106,11 +106,11 @@ function addTask () {
   newTaskLabel.value = ''
 }
 
-function toggleCollapse() {
+function toggleCollapse () {
   isCollapsed.value = !isCollapsed.value
 }
 
-function checkScreenSize() {
+function checkScreenSize () {
   isMobile.value = window.innerWidth <= 768
 
   // If switching from mobile to desktop, make sure boards are expanded
