@@ -107,3 +107,123 @@ onBeforeUnmount(() => {
   document.removeEventListener('click', handleClickOutside)
 })
 </script>
+
+<style lang="scss">
+.context-menu {
+  position: fixed;
+  background: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  z-index: 1000;
+  min-width: 300px;
+  max-width: 95vw;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+
+  &__header {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.02);
+
+    h3 {
+      margin: 0;
+      color: var(--text-dark);
+      font-size: 1.1rem;
+      font-weight: 600;
+    }
+  }
+
+  &__close {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.08);
+    color: var(--text-dark);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition-fast);
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.12);
+    }
+  }
+
+  &__content {
+    padding: 1.5rem;
+  }
+
+  &__button {
+    width: 100%;
+    padding: 1rem;
+    border: none;
+    background: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: var(--transition-fast);
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+
+    &:hover {
+      background: var(--secondary-color);
+      transform: translateY(-2px);
+    }
+  }
+
+  /* Responsive styles for mobile devices */
+  @media (max-width: 768px) {
+    width: 90vw;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: fixed;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+
+    &__header {
+      padding: 0.85rem 1.25rem;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+
+      h3 {
+        font-size: 1rem;
+      }
+    }
+
+    &__content {
+      padding: 1.25rem;
+    }
+
+    &__button {
+      padding: 0.85rem;
+      font-size: 0.95rem;
+    }
+
+    /* Custom scrollbar for context menu */
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 2px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 2px;
+    }
+  }
+}
+</style>

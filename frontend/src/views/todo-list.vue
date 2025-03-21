@@ -36,10 +36,10 @@
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-import TaskHeader from '@/components/TaskHeader.vue'
-import TaskBoard from '@/components/TaskBoard.vue'
-import ContextMenu from '@/components/ContextMenu.vue'
-import TaskService from '@/services/TaskService'
+import TaskHeader from '@/components/task-header.vue'
+import TaskBoard from '@/components/task-board.vue'
+import ContextMenu from '@/components/context-menu.vue'
+import TaskService from '@/services/task-service.js'
 
 // Reactive state
 const tasks = ref([])
@@ -185,6 +185,38 @@ onMounted(() => {
     gap: 1.5rem;
     flex: 1;
     min-height: 0;
+  }
+
+  /* Responsive styles for tablets and smaller screens */
+  @media (max-width: 1024px) {
+    padding: 1.5rem;
+    margin: 0.75rem;
+    border-radius: 18px;
+    gap: 1.5rem;
+
+    .task-boards {
+      gap: 1rem;
+    }
+  }
+
+  /* Responsive styles for mobile devices */
+  @media (max-width: 768px) {
+    padding: 1rem;
+    margin: 0.5rem;
+    border-radius: 16px;
+    gap: 1rem;
+
+    .task-boards {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      overflow-y: auto;
+      padding-bottom: 1rem;
+    }
+
+    .message {
+      padding: 0.75rem 1rem;
+      font-size: 0.9rem;
+    }
   }
 }
 </style>

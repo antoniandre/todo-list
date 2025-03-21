@@ -22,6 +22,53 @@
   --board-todo-color: #3a56e4;
   --board-doing-color: #e91e63;
   --board-done-color: #0bb5e0;
+  --touch-target-size: 44px; /* Minimum touch target size for mobile */
+  --mobile-spacing: 12px; /* Standard spacing for mobile UI */
+}
+
+/* Responsive touch enhancements */
+@media (max-width: 768px) {
+  /* Increase touch target sizes for mobile */
+  button,
+  a,
+  input[type="button"],
+  input[type="submit"],
+  .task-card__action,
+  .stat__icon,
+  .task-board__icon {
+    min-height: var(--touch-target-size);
+    min-width: var(--touch-target-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Increase tap target padding */
+  input,
+  select,
+  textarea {
+    padding: 12px;
+    font-size: 16px; /* Prevent iOS zoom on focus */
+  }
+
+  /* Prevent text selection during touch interactions */
+  .task-card,
+  .task-board__header {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Add pull-to-refresh effect with inertia scrolling */
+  .task-boards {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+  }
+
+  /* Active state for better touch feedback */
+  .task-card:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+  }
 }
 
 // Header styles
