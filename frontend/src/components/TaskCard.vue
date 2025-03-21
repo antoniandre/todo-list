@@ -1,36 +1,26 @@
-<template>
-  <div
-    :class="['task-card', `task-card--${task.id}`, `task-card--${task.status}`, { 'task-card--dragging': isDragging }]"
-    draggable="true"
-    @dragstart="onDragStart"
-    @dragend="onDragEnd"
-    @contextmenu.prevent="$emit('context-menu', task)"
-  >
-    <div class="task-card__content">
-      <div class="task-card__header">
-        <label class="task-card__label">{{ task.label }}</label>
-        <div class="task-card__actions">
-          <router-link :to="`/task/${task.id}`" class="task-card__action task-card__action--edit" title="Edit task">
-            <i class="i-edit"></i>
-          </router-link>
-          <button class="task-card__action task-card__action--delete" @click.stop="$emit('delete', task.id)" title="Delete task">
-            <i class="i-trash"></i>
-          </button>
-        </div>
-      </div>
-      <div v-if="task.description" class="task-card__description">
-        {{ task.description }}
-      </div>
-      <div class="task-card__footer">
-        <div v-if="task.assignee" class="task-card__assignee">
-          <div class="avatar">
-            {{ getUserInitials(task.assignee) }}
-          </div>
-          <span>{{ getUserName(task.assignee) }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
+<template lang="pug">
+div(
+  :class="['task-card', `task-card--${task.id}`, `task-card--${task.status}`, { 'task-card--dragging': isDragging }]"
+  draggable="true"
+  @dragstart="onDragStart"
+  @dragend="onDragEnd"
+  @contextmenu.prevent="$emit('context-menu', task)"
+)
+  .task-card__content
+    .task-card__header
+      label.task-card__label {{ task.label }}
+      .task-card__actions
+        router-link(:to="`/task/${task.id}`" class="task-card__action task-card__action--edit" title="Edit task")
+          i.i-edit
+        button.task-card__action.task-card__action--delete(@click.stop="$emit('delete', task.id)" title="Delete task")
+          i.i-trash
+    .task-card__description(v-if="task.description")
+      | {{ task.description }}
+    .task-card__footer
+      .task-card__assignee(v-if="task.assignee")
+        .avatar
+          | {{ getUserInitials(task.assignee) }}
+        span {{ getUserName(task.assignee) }}
 </template>
 
 <script setup>

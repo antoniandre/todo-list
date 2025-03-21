@@ -1,19 +1,17 @@
-<template>
-<div class="main-content main-content--todo-list">
-  <!-- Header with improved visuals -->
-  <TaskHeader :tasks="tasks" />
+<template lang="pug">
+.main-content.main-content--todo-list
+  //- Header with improved visuals
+  TaskHeader(:tasks="tasks")
 
-  <!-- Error message with animation -->
-  <transition name="fade">
-    <div v-if="error" class="message message--error">
-      <i class="i-alert-circle"></i>
-      <span>Oops! Something went wrong. Please try again.</span>
-    </div>
-  </transition>
+  //- Error message with animation
+  transition(name="fade")
+    .message.message--error(v-if="error")
+      i.i-alert-circle
+      span Oops! Something went wrong. Please try again.
 
-  <!-- Task boards with improved layout -->
-  <div class="task-boards">
-    <TaskBoard
+  //- Task boards with improved layout
+  .task-boards
+    TaskBoard(
       v-for="status in todoStatuses"
       :key="status.value"
       :status="status"
@@ -23,19 +21,17 @@
       @context-menu="openContextMenu"
       @add-task="saveNewTask"
       @drop-task="onTaskDrop"
-    />
-  </div>
+    )
 
-  <!-- Context menu component -->
-  <ContextMenu
+  //- Context menu component
+  ContextMenu(
     :task="contextMenuTask"
     :users="users"
     :visible="showContextMenu"
     :trigger-element="contextMenuTrigger"
     @close="closeContextMenu"
     @save="saveTask"
-  />
-</div>
+  )
 </template>
 
 <script setup>

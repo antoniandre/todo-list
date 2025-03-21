@@ -1,36 +1,24 @@
-<template>
-  <Teleport to="body">
-    <transition name="scale">
-      <div v-if="visible" ref="menuElement" class="context-menu" :style="position">
-        <div class="context-menu__header">
-          <h3>Assign Task</h3>
-          <button class="context-menu__close" @click="$emit('close')">
-            <i class="i-x"></i>
-          </button>
-        </div>
-        <div class="context-menu__content">
-          <div class="field">
-            <label for="assignee" class="field__label">Assign to:</label>
-            <div class="field__input-container">
-              <select v-model="selectedAssignee" id="assignee" class="field__input">
-                <option value="">Unassigned</option>
-                <option v-for="user in users" :key="user.id" :value="user.id">
-                  {{ user.firstName }} {{ user.lastName }}
-                </option>
-              </select>
-              <div class="field__icon">
-                <i class="i-chevron-down"></i>
-              </div>
-            </div>
-          </div>
-          <button class="context-menu__button" @click="saveChanges">
-            <i class="i-check"></i>
-            <span>Save</span>
-          </button>
-        </div>
-      </div>
-    </transition>
-  </Teleport>
+<template lang="pug">
+Teleport(to="body")
+  transition(name="scale")
+    .context-menu(v-if="visible" ref="menuElement" :style="position")
+      .context-menu__header
+        h3 Assign Task
+        button.context-menu__close(@click="$emit('close')")
+          i.i-x
+      .context-menu__content
+        .field
+          label.field__label(for="assignee") Assign to:
+          .field__input-container
+            select.field__input#assignee(v-model="selectedAssignee")
+              option(value="") Unassigned
+              option(v-for="user in users" :key="user.id" :value="user.id")
+                | {{ user.firstName }} {{ user.lastName }}
+            .field__icon
+              i.i-chevron-down
+        button.context-menu__button(@click="saveChanges")
+          i.i-check
+          span Save
 </template>
 
 <script setup>
@@ -66,7 +54,7 @@ const position = ref({
 
 // Set initial assignee value when task changes
 watch(() => props.task, (newTask) => {
-  if (newTask && newTask.assignee) {
+  if (newTask?.assignee) {
     selectedAssignee.value = newTask.assignee
   } else {
     selectedAssignee.value = ''

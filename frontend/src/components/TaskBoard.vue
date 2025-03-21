@@ -1,55 +1,45 @@
-<template>
-  <div
-    :class="[
-      'task-board',
-      `task-board--${status.value}`,
-      { 'task-board--drag-over': isDragOver }
-    ]"
-    @dragover.prevent="onDragOver"
-    @dragleave="onDragLeave"
-    @drop="onDrop"
-  >
-    <div class="task-board__header">
-      <div class="task-board__header-left">
-        <div class="task-board__icon">
-          <i :class="`i-${status.icon}`"></i>
-        </div>
-        <h2 class="task-board__title">{{ status.label }}</h2>
-      </div>
-      <div class="task-board__count">{{ tasks.length }}</div>
-    </div>
+<template lang="pug">
+div(
+  :class="[
+    'task-board',
+    `task-board--${status.value}`,
+    { 'task-board--drag-over': isDragOver }
+  ]"
+  @dragover.prevent="onDragOver"
+  @dragleave="onDragLeave"
+  @drop="onDrop"
+)
+  .task-board__header
+    .task-board__header-left
+      .task-board__icon
+        i(:class="`i-${status.icon}`")
+      h2.task-board__title {{ status.label }}
+    .task-board__count {{ tasks.length }}
 
-    <div class="task-board__content">
-      <div class="task-list">
-        <transition-group name="task-transition">
-          <TaskCard
-            v-for="task in tasks"
-            :key="task.id"
-            :task="task"
-            :users="users"
-            @delete="$emit('delete-task', $event)"
-            @context-menu="$emit('context-menu', $event)"
-            @drag-start="taskDragStart"
-            @drag-end="taskDragEnd"
-          />
-        </transition-group>
+  .task-board__content
+    .task-list
+      transition-group(name="task-transition")
+        TaskCard(
+          v-for="task in tasks"
+          :key="task.id"
+          :task="task"
+          :users="users"
+          @delete="$emit('delete-task', $event)"
+          @context-menu="$emit('context-menu', $event)"
+          @drag-start="taskDragStart"
+          @drag-end="taskDragEnd"
+        )
 
-        <!-- New task input -->
-        <div class="task-card task-card--new">
-          <input
-            v-model="newTaskLabel"
-            @keypress.enter="addTask"
-            type="text"
-            placeholder="Add new task..."
-            class="task-card__input"
-          />
-          <button class="task-card__add" @click="addTask" title="Add task">
-            <i class="i-plus"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
+      // New task input
+      .task-card.task-card--new
+        input.task-card__input(
+          v-model="newTaskLabel"
+          @keypress.enter="addTask"
+          type="text"
+          placeholder="Add new task..."
+        )
+        button.task-card__add(@click="addTask" title="Add task")
+          i.i-plus
 </template>
 
 <script setup>
