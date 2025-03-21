@@ -5,7 +5,7 @@ Teleport(to="body")
       .context-menu__header
         h3 Assign Task
         button.context-menu__close(@click="$emit('close')")
-          i.i-x
+          i.mdi.mdi-close
       .context-menu__content
         .field
           label.field__label(for="assignee") Assign to:
@@ -15,9 +15,9 @@ Teleport(to="body")
               option(v-for="user in users" :key="user.id" :value="user.id")
                 | {{ user.firstName }} {{ user.lastName }}
             .field__icon
-              i.i-chevron-down
+              i.mdi.mdi-chevron-down
         button.context-menu__button(@click="saveChanges")
-          i.i-check
+          i.mdi.mdi-check
           span Save
 </template>
 

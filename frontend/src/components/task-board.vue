@@ -8,7 +8,7 @@
   .task-board__header
     .task-board__header-left
       .task-board__icon
-        i(:class="`i-${status.icon}`")
+        i.mdi(:class="`mdi-${status.icon}`")
       h2.task-board__title {{ status.label }}
     .task-board__count {{ tasks.length }}
     button.task-board__collapse-btn(
@@ -17,7 +17,7 @@
       :class="{ 'task-board__collapse-btn--collapsed': isCollapsed }"
       aria-label="Toggle board visibility"
     )
-      i(:class="isCollapsed ? 'i-chevron-down' : 'i-chevron-up'")
+      i.mdi(:class="isCollapsed ? 'mdi-chevron-down' : 'mdi-chevron-up'")
 
   .task-board__content(v-show="!isCollapsed")
     .task-list
@@ -42,7 +42,7 @@
           placeholder="Add new task..."
         )
         button.task-card__add(@click="addTask" title="Add task")
-          i.i-plus
+          i.mdi.mdi-plus
 </template>
 
 <script setup>
@@ -207,7 +207,7 @@ onUnmounted(() => {
 
   &__title {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.8rem;
     font-weight: 600;
     color: var(--text-dark);
   }

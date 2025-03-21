@@ -6,19 +6,19 @@
   .todo-header__stats
     .stat.stat--total
       .stat__icon
-        i.i-clipboard
+        i.mdi.mdi-clipboard-text-outline
       .stat__info
         span.stat__number {{ totalTasks }}
         span.stat__label Total Tasks
     .stat.stat--completed
       .stat__icon
-        i.i-check
+        i.mdi.mdi-check-bold
       .stat__info
         span.stat__number {{ completedTasks }}
         span.stat__label Completed
     .stat.stat--progress
       .stat__icon
-        i.i-chart
+        i.mdi.mdi-chart-donut
       .stat__info
         .progress-bar
           .progress-bar__fill(:style="{ width: `${completionPercentage}%` }")

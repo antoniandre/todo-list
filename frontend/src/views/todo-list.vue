@@ -1,17 +1,17 @@
 <template lang="pug">
 .main-content.main-content--todo-list
   //- Header with improved visuals
-  TaskHeader(:tasks="tasks")
+  task-header(:tasks="tasks")
 
   //- Error message with animation
   transition(name="fade")
     .message.message--error(v-if="error")
-      i.i-alert-circle
+      i.mdi.mdi-alert-circle
       span Oops! Something went wrong. Please try again.
 
   //- Task boards with improved layout
   .task-boards
-    TaskBoard(
+    task-board(
       v-for="status in todoStatuses"
       :key="status.value"
       :status="status"
@@ -24,7 +24,7 @@
     )
 
   //- Context menu component
-  ContextMenu(
+  context-menu(
     :task="contextMenuTask"
     :users="users"
     :visible="showContextMenu"
@@ -51,12 +51,13 @@ const contextMenuTrigger = ref(null)
 
 // Task statuses configuration
 const todoStatuses = [
-  { value: 'todo', label: 'To Do', icon: 'list-check' },
-  { value: 'doing', label: 'In Progress', icon: 'clock' },
-  { value: 'done', label: 'Completed', icon: 'check-circle' }
+  { value: 'todo', label: 'To Do', icon: 'format-list-checks' },
+  { value: 'doing', label: 'In Progress', icon: 'clock-outline' },
+  { value: 'done', label: 'Completed', icon: 'check-circle-outline' }
 ]
 
 // Computed properties
+// eslint-disable-next-line no-unused-vars
 const tasksPerStatus = computed(() => {
   const map = {}
   for (const status of todoStatuses) {
@@ -66,12 +67,14 @@ const tasksPerStatus = computed(() => {
 })
 
 // Methods
+// eslint-disable-next-line no-unused-vars
 function openContextMenu (task) {
   contextMenuTask.value = task
   contextMenuTrigger.value = document.querySelector(`.task-card--${task.id}`)
   showContextMenu.value = true
 }
 
+// eslint-disable-next-line no-unused-vars
 function closeContextMenu () {
   showContextMenu.value = false
 }
@@ -99,6 +102,7 @@ async function saveTask (task) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 async function saveNewTask (taskData) {
   if (!taskData.label.trim()) return
 
@@ -111,6 +115,7 @@ async function saveNewTask (taskData) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 async function deleteTask (id) {
   try {
     await TaskService.deleteTask(id)
@@ -121,6 +126,7 @@ async function deleteTask (id) {
   }
 }
 
+// eslint-disable-next-line no-unused-vars
 function onTaskDrop ({ taskId, status }) {
   const task = tasks.value.find(t => t.id === taskId)
   if (!task) return
@@ -156,12 +162,10 @@ onMounted(() => {
   gap: 2rem;
   position: relative;
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(3px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
   border-radius: 24px;
   margin: 1rem;
+
+  &:before {display: none;}
 
   .message {
     display: flex;
@@ -194,9 +198,7 @@ onMounted(() => {
     border-radius: 18px;
     gap: 1.5rem;
 
-    .task-boards {
-      gap: 1rem;
-    }
+    .task-boards {gap: 1rem;}
   }
 
   /* Responsive styles for mobile devices */

@@ -15,9 +15,9 @@ div(
       label.task-card__label {{ task.label }}
       .task-card__actions
         router-link(:to="`/task/${task.id}`" class="task-card__action task-card__action--edit" title="Edit task")
-          i.i-edit
+          i.mdi.mdi-pencil
         button.task-card__action.task-card__action--delete(@click.stop="$emit('delete', task.id)" title="Delete task")
-          i.i-trash
+          i.mdi.mdi-delete
     .task-card__description(v-if="task.description")
       | {{ task.description }}
     .task-card__footer
@@ -32,12 +32,12 @@ div(
       @click.stop="$router.push(`/task/${task.id}`)"
       title="Edit task"
     )
-      i.i-edit
+      i.mdi.mdi-pencil
     button.task-card__swipe-action.task-card__swipe-action--delete(
       @click.stop="$emit('delete', task.id)"
       title="Delete task"
     )
-      i.i-trash
+      i.mdi.mdi-delete
 </template>
 
 <script setup>
