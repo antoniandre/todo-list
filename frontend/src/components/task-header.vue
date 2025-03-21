@@ -174,18 +174,18 @@ const completionPercentage = computed(() => {
   }
 
   &--total .stat__icon {
-    background: rgba(58, 86, 228, 0.15);
-    color: var(--primary-color);
+    background: rgba(255, 160, 160, 0.4);
+    color: var(--board-todo-color);
   }
 
   &--completed .stat__icon {
-    background: rgba(11, 181, 224, 0.15);
-    color: var(--success-color);
+    background: rgba(168, 230, 168, 0.4);
+    color: var(--board-done-color);
   }
 
   &--progress .stat__icon {
-    background: rgba(233, 30, 99, 0.15);
-    color: var(--danger-color);
+    background: rgba(255, 219, 109, 0.4);
+    color: var(--board-doing-color);
   }
 
   &__info {

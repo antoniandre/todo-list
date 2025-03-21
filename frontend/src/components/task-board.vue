@@ -159,7 +159,7 @@ onUnmounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 1.5rem;
+    padding: 0.4rem 1rem 0rem 0.5rem;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     background: rgba(255, 255, 255, 0.7);
   }
@@ -171,29 +171,18 @@ onUnmounted(() => {
   }
 
   &__icon {
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
-    font-size: 1rem;
+    font-size: 1.5rem;
   }
 
-  &--todo &__icon {
-    background: rgba(58, 86, 228, 0.15);
-    color: var(--board-todo-color);
-  }
-
-  &--doing &__icon {
-    background: rgba(233, 30, 99, 0.15);
-    color: var(--board-doing-color);
-  }
-
-  &--done &__icon {
-    background: rgba(11, 181, 224, 0.15);
-    color: var(--board-done-color);
-  }
+  &--todo &__icon {color: var(--board-todo-color);}
+  &--doing &__icon {color: var(--board-doing-color);}
+  &--done &__icon {color: var(--board-done-color);}
 
   &__title {
     margin: 0;
@@ -218,9 +207,7 @@ onUnmounted(() => {
     max-height: calc(100vh - 260px);
 
     /* Custom scrollbar */
-    &::-webkit-scrollbar {
-      width: 6px;
-    }
+    &::-webkit-scrollbar {width: 6px;}
 
     &::-webkit-scrollbar-track {
       background: rgba(0, 0, 0, 0.03);
@@ -249,28 +236,16 @@ onUnmounted(() => {
     border-radius: 50%;
     transition: transform 0.3s ease, background-color 0.3s ease;
 
-    &:hover {
-      background-color: rgba(0, 0, 0, 0.05);
-    }
+    &:hover {background-color: rgba(0, 0, 0, 0.05);}
 
-    &--collapsed {
-      transform: rotate(180deg);
-    }
+    &--collapsed {transform: rotate(180deg);}
   }
 
   /* Responsive styles for tablets */
   @media (max-width: 1024px) {
-    &__header {
-      padding: 0.85rem 1.25rem;
-    }
-
-    &__title {
-      font-size: 1rem;
-    }
-
-    &__content {
-      padding: 0.85rem;
-    }
+    &__header {padding: 0.85rem 1.25rem;}
+    &__title {font-size: 1rem;}
+    &__content {padding: 0.85rem;}
   }
 
   /* Responsive styles for mobile devices */
@@ -293,14 +268,10 @@ onUnmounted(() => {
       max-height: 350px; /* Add a reasonable height limit for each board */
     }
 
-    &__collapse-btn {
-      display: flex;
-    }
+    &__collapse-btn {display: flex;}
 
     &--collapsed {
-      .task-board__header {
-        border-bottom: none;
-      }
+      .task-board__header {border-bottom: none;}
     }
   }
 }

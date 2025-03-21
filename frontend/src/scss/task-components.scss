@@ -19,9 +19,9 @@
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.18);
   --transition-fast: 0.2s ease;
   --transition-normal: 0.3s ease;
-  --board-todo-color: #3a56e4;
-  --board-doing-color: #e91e63;
-  --board-done-color: #0bb5e0;
+  --board-todo-color: rgba(255, 160, 160, 1); /* Matches total stats bg */
+  --board-doing-color: rgba(255, 219, 109, 1); /* Matches progress stats bg */
+  --board-done-color: rgba(168, 230, 168, 1); /* Matches completed stats bg */
   --touch-target-size: 44px; /* Minimum touch target size for mobile */
   --mobile-spacing: 12px; /* Standard spacing for mobile UI */
 }
