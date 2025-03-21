@@ -18,6 +18,7 @@
           @contextmenu.prevent="openContextMenu(task)"
           draggable="true"
           @dragstart="onTaskDragStart($event, task)"
+          @dragend="onTaskDragEnd"
           :class="{ [`task task--${task.id} task--${status.value}`]: true, 'task--focused': task.focused }">
           <label class="task__label">{{ task.label }}</label>
           <router-link :to="`/task/${task.id}`" class="task__open-link arrow i-arrow-right" @click.stop></router-link>
@@ -148,7 +149,7 @@ const openContextMenu = task => {
 
   nextTick(() => {
     const { left, top, width, height } = taskDomNode.getBoundingClientRect()
-    contextMenuElement.value.style.left = left + 'px'
+    contextMenuElement.value.style.left = `${left}px`
     contextMenuElement.value.style.width = width + 'px'
     contextMenuElement.value.style.top = top + height + 'px'
   })
@@ -163,7 +164,14 @@ const closeContextMenu = e => {
 }
 
 const onTaskDragStart = (e, task) => {
-  task.focused = true
+  const taskDomNode = e.target.closest('.task')
+  taskDomNode.classList.add('task--dragging')
+  // Update classes right after the dragging clone is created.
+  setTimeout(() => {
+    taskDomNode.classList.add('task--ghost')
+    taskDomNode.classList.remove('task--dragging')
+  }, 0)
+
   e.dataTransfer.setData('taskId', task.id)
 }
 
@@ -173,6 +181,11 @@ const onTaskDrop = (e, status) => {
   const task = tasks.value.find(task => task.id === taskId)
   task.status = status
   saveTask(task)
+}
+
+const onTaskDragEnd = e => {
+  e.target.closest('.task').classList.remove('task--dragging')
+  e.target.closest('.task').classList.remove('task--ghost')
 }
 
 fetch('/api/tasks', {
@@ -247,11 +260,18 @@ onBeforeUnmount(() => {
     display: flex;
     align-items: center;
     padding: 5px 20px;
-    transition: 0.2s;
+    transition: opacity 0.2s ease-in-out;
     cursor: pointer;
 
     &:hover {background-color: rgba(255, 255, 255, 0.2);}
-    &--focused {background-color: rgba(255, 255, 255, 0.2);}
+    &--dragging {
+      border: 1px solid $primary-color;
+      background-color: rgba(255, 0, 0, 0.5) !important;
+    }
+    &--ghost {
+      opacity: 0.5;
+      background-color: rgba(0, 255, 8, 0.5) !important;
+    }
   }
 
   .task__label {
